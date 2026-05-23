@@ -1,31 +1,1069 @@
-# AI / LLM — Complete Topic Checklist
-## For Cognizant Ace Team — Full-Stack AI Engineer Interview
+---
+title: Cognizant Ace Team — Master Interview Prep Checklist
+tags: [interview, cognizant, ace-team, full-stack, ai-engineer, prep]
+created: 2026-05-23
+owner: Kailash
+status: in-progress
+---
 
-> Single source of truth. Every AI topic you need for the interview.
-> Mark each topic as you finish revising it.
+# 🎯 Cognizant Ace Team — Master Interview Prep Checklist
+
+> **Single source of truth.** Every topic for the Ace Full-Stack AI Engineer interview.
+> Format: Obsidian-friendly markdown. Use checkboxes to track progress.
+> Tier legend: 🔴 = Must Know Cold · 🟡 = Awareness / One-Liner · ⚪ = Skip Unless Time Permits
+
+> [!info] Context
+> - Aptitude ✅ cleared
+> - HackerRank coding round ✅ cleared
+> - **Interview round remaining** — technical deep-dive + behavioral
+> - Strongest assets: AcquirerX (Java/Spring microservices) + Care++ (RAG/LangChain/FAISS)
 
 ---
 
-# PRIORITY TIERS (READ FIRST)
+## 📋 Table of Contents
 
-## 🔴 Mission-Critical (Must Know Cold)
-Sections: 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 13, 15, 16, 19, 21 (LangChain part), 22, 25, 26, 27, 32, 38, 39, 40, 41
-
-## 🟡 Nice-to-Have (One-Liner Awareness)
-Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31, 33, 34, 35, 36, 37
-
-## ⚪ Skip Unless Time Permits
-- Detailed transformer math
-- LoRA/QLoRA/PEFT internals
-- ColBERT, speculative decoding, KV cache internals
-- EU AI Act details
-- Ray Serve, Triton internals
-- Image generation deep-dive
-- Semantic Kernel, Haystack details
+- [[#🧭 Priority Tiers Overview]]
+- [[#PART A — CORE PROGRAMMING LANGUAGES]]
+  - [[#1. Java]]
+  - [[#2. Python]]
+  - [[#3. JavaScript]]
+  - [[#4. TypeScript]]
+- [[#PART B — COMPUTER SCIENCE FUNDAMENTALS]]
+  - [[#5. Data Structures]]
+  - [[#6. Algorithms]]
+  - [[#7. OOP Concepts]]
+  - [[#8. Operating Systems]]
+  - [[#9. Computer Networks]]
+- [[#PART C — DATABASES]]
+  - [[#10. SQL]]
+  - [[#11. DBMS Concepts]]
+  - [[#12. NoSQL]]
+- [[#PART D — BACKEND (JAVA + SPRING)]]
+  - [[#13. Spring Core]]
+  - [[#14. Spring Boot]]
+  - [[#15. Spring Data JPA + Hibernate]]
+  - [[#16. Spring Security + JWT]]
+  - [[#17. Spring Cloud + Microservices]]
+- [[#PART E — FRONTEND]]
+  - [[#18. HTML]]
+  - [[#19. CSS + Bootstrap]]
+  - [[#20. React]]
+- [[#PART F — SYSTEM DESIGN]]
+  - [[#21. System Design Fundamentals]]
+  - [[#22. AI-Specific System Design]]
+- [[#PART G — AI / LLM (FULL MODULE)]]
+  - [[#23. LLM Fundamentals]]
+  - [[#24. Tokens and Tokenization]]
+  - [[#25. Context Window]]
+  - [[#26. Generation Parameters]]
+  - [[#27. Embeddings]]
+  - [[#28. Fine-tuning vs Prompting vs RAG]]
+  - [[#29. Hallucinations]]
+  - [[#30. Prompt Engineering]]
+  - [[#31. Structured Outputs]]
+  - [[#32. Prompt Injection and Security]]
+  - [[#33. RAG — Retrieval Augmented Generation]]
+  - [[#34. Document Loading]]
+  - [[#35. Chunking]]
+  - [[#36. Embedding for RAG]]
+  - [[#37. Vector Databases]]
+  - [[#38. Retrieval]]
+  - [[#39. Reranking]]
+  - [[#40. Prompt Augmentation]]
+  - [[#41. RAG Evaluation]]
+  - [[#42. Advanced RAG Patterns]]
+  - [[#43. LLM Orchestration Frameworks]]
+  - [[#44. Agentic Workflows]]
+  - [[#45. Memory in LLM Apps]]
+  - [[#46. AI Evaluation and Metrics]]
+  - [[#47. Guardrails]]
+  - [[#48. Cost Optimization]]
+  - [[#49. Latency Optimization]]
+  - [[#50. Caching Strategies]]
+  - [[#51. Monitoring and Observability]]
+  - [[#52. Fallback and Degradation]]
+  - [[#53. Responsible AI]]
+  - [[#54. Security and Privacy (LLM)]]
+  - [[#55. LLM APIs and SDKs]]
+  - [[#56. Design Patterns and Architecture]]
+  - [[#57. LLM Gateway]]
+  - [[#58. Multimodal AI]]
+  - [[#59. Open-source Model Deployment]]
+- [[#PART H — CLOUD + DEVOPS]]
+  - [[#60. AWS]]
+  - [[#61. Docker]]
+  - [[#62. Kubernetes]]
+  - [[#63. CI/CD]]
+  - [[#64. Git]]
+  - [[#65. Linux Basics]]
+- [[#PART I — INTERVIEW-SPECIFIC]]
+  - [[#66. Common AI Interview Questions]]
+  - [[#67. Care++ Specific]]
+  - [[#68. AcquirerX + AI Differentiator]]
+  - [[#69. AI Coding Assistants (JD-Mandated)]]
+  - [[#70. Behavioral / HR Round]]
+  - [[#71. Live Coding Round]]
+  - [[#72. Project Walkthrough Mastery]]
+- [[#📚 Recommended Learning Resources]]
+- [[#🚫 What to Skip]]
+- [[#✅ Final Interview-Day Checklist]]
+- [[#📊 Coverage Scorecard]]
+- [[#🗓️ Study Strategy]]
 
 ---
 
-# 1. LLM Fundamentals 🔴
+## 🧭 Priority Tiers Overview
+
+> [!warning] Tier Definitions
+> - 🔴 **Mission-Critical** — Must know cold. Asked in almost every round.
+> - 🟡 **Nice-to-Have** — One-liner awareness; know it exists.
+> - ⚪ **Skip** — Too niche or too deep for fresher Ace Team interview.
+
+---
+
+# PART A — CORE PROGRAMMING LANGUAGES
+
+## 1. Java
+
+> [!tip] You're strong here — leverage AcquirerX as the example for every concept.
+
+### 1.1 OOP in Java 🔴
+- [ ] Inheritance (with `extends`, `super`)
+- [ ] Polymorphism (compile-time vs run-time)
+- [ ] Encapsulation (access modifiers, getters/setters)
+- [ ] Abstraction (abstract class, interface)
+- [ ] Method overloading vs overriding
+- [ ] `this` and `super` keywords
+- [ ] Constructor chaining
+- [ ] `final` keyword (class, method, variable)
+- [ ] `static` keyword (variables, methods, blocks)
+
+### 1.2 Abstract Class vs Interface 🔴
+- [ ] When to use abstract class vs interface
+- [ ] Java 8 default methods in interfaces
+- [ ] Java 8 static methods in interfaces
+- [ ] Java 9 private methods in interfaces
+- [ ] Functional interfaces (`@FunctionalInterface`)
+- [ ] Marker interfaces
+
+### 1.3 Collections Framework 🔴
+- [ ] `List` — ArrayList vs LinkedList vs Vector
+- [ ] `Set` — HashSet vs LinkedHashSet vs TreeSet
+- [ ] `Map` — HashMap vs LinkedHashMap vs TreeMap vs Hashtable vs ConcurrentHashMap
+- [ ] `Queue` — PriorityQueue, ArrayDeque
+- [ ] `Stack` (legacy) vs ArrayDeque
+- [ ] Iterator vs ListIterator
+- [ ] fail-fast vs fail-safe iterators
+- [ ] When to use which collection
+
+### 1.4 HashMap Internals 🔴
+- [ ] Hashing function
+- [ ] Buckets / table
+- [ ] Collision resolution (chaining)
+- [ ] Load factor (default 0.75) and threshold
+- [ ] Resizing (doubling capacity)
+- [ ] Treeify (Java 8+, 8 entries in a bucket → red-black tree)
+- [ ] `hashCode()` and `equals()` contract
+- [ ] Why immutable keys matter
+
+### 1.5 Strings 🔴
+- [ ] String pool / string interning
+- [ ] String vs StringBuilder vs StringBuffer
+- [ ] Immutability of String
+- [ ] `intern()` method
+- [ ] String concatenation performance
+
+### 1.6 Exception Handling 🔴
+- [ ] Checked vs unchecked exceptions
+- [ ] try-catch-finally
+- [ ] try-with-resources (AutoCloseable)
+- [ ] Multi-catch
+- [ ] throw vs throws
+- [ ] Custom exceptions
+- [ ] Exception chaining
+
+### 1.7 Multithreading 🔴
+- [ ] Thread vs Runnable
+- [ ] Thread lifecycle (NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED)
+- [ ] `synchronized` keyword (method, block)
+- [ ] `volatile` keyword
+- [ ] `wait()`, `notify()`, `notifyAll()`
+- [ ] `join()`, `sleep()`, `yield()`
+- [ ] Deadlock and how to avoid
+- [ ] Race conditions
+- [ ] Atomic classes (`AtomicInteger`, `AtomicReference`)
+- [ ] ExecutorService and thread pools
+- [ ] `Callable` and `Future`
+- [ ] `CompletableFuture` (async programming)
+- [ ] ForkJoinPool (conceptual)
+
+### 1.8 Java 8 Features 🔴
+- [ ] Lambda expressions (syntax, types)
+- [ ] Functional interfaces — Function, Predicate, Consumer, Supplier, BiFunction
+- [ ] Method references (`::`)
+- [ ] Stream API — filter, map, reduce, collect, forEach
+- [ ] Stream operations (intermediate vs terminal)
+- [ ] Parallel streams
+- [ ] `Optional` class
+- [ ] Default and static methods in interfaces
+- [ ] Date/Time API (`java.time`)
+
+### 1.9 Java Memory Model 🔴
+- [ ] Heap vs Stack memory
+- [ ] Method area / Metaspace (Java 8+)
+- [ ] Young Gen, Old Gen, Eden, Survivor spaces
+- [ ] Garbage Collection (Mark-Sweep, G1, ZGC — conceptual)
+- [ ] Memory leaks in Java
+- [ ] OutOfMemoryError vs StackOverflowError
+
+### 1.10 Generics 🟡
+- [ ] Type parameters (`<T>`, `<E>`, `<K, V>`)
+- [ ] Bounded type parameters (`<T extends Number>`)
+- [ ] Wildcards — unbounded `<?>`, upper-bounded `<? extends T>`, lower-bounded `<? super T>`
+- [ ] Type erasure
+- [ ] Why generics exist (compile-time type safety)
+
+### 1.11 `equals()` and `hashCode()` 🔴
+- [ ] The contract — equal objects must have equal hashcodes
+- [ ] Why both must be overridden together
+- [ ] Symmetric, transitive, reflexive properties
+- [ ] How to implement them correctly
+
+### 1.12 Immutability 🔴
+- [ ] How to make a class immutable (final class, final fields, no setters, defensive copies)
+- [ ] Benefits (thread safety, predictability)
+- [ ] Why String is immutable
+
+### 1.13 Comparable vs Comparator 🟡
+- [ ] `compareTo()` method
+- [ ] `compare()` method
+- [ ] Natural ordering vs custom ordering
+
+### 1.14 Serialization 🟡
+- [ ] `Serializable` interface
+- [ ] `serialVersionUID`
+- [ ] `transient` keyword
+- [ ] Externalizable vs Serializable
+
+### 1.15 Java 21 Features 🟡
+- [ ] Records (compact data classes)
+- [ ] Sealed classes (`sealed`, `permits`)
+- [ ] Pattern matching for switch
+- [ ] Pattern matching for instanceof
+- [ ] Virtual threads (Project Loom)
+- [ ] Text blocks (multi-line strings)
+
+---
+
+## 2. Python
+
+> [!warning] This is your biggest language gap. Focus on enough to discuss Care++ and Python-heavy AI tooling.
+
+### 2.1 Basics 🔴
+- [ ] Indentation as syntax
+- [ ] Variables, dynamic typing
+- [ ] Data types — int, float, str, bool, None
+- [ ] Operators (arithmetic, comparison, logical, identity, membership)
+- [ ] Type conversion / casting
+- [ ] `print()`, f-strings, formatted output
+
+### 2.2 Data Structures 🔴
+- [ ] List — mutable, ordered, indexable
+- [ ] Tuple — immutable, ordered
+- [ ] Set — unordered, unique
+- [ ] Dictionary — key-value pairs
+- [ ] When to use which
+- [ ] Slicing (`[start:stop:step]`)
+
+### 2.3 Comprehensions 🔴
+- [ ] List comprehensions
+- [ ] Dict comprehensions
+- [ ] Set comprehensions
+- [ ] Generator expressions
+
+### 2.4 Functions 🔴
+- [ ] Function definition (`def`)
+- [ ] Positional vs keyword args
+- [ ] Default arguments
+- [ ] `*args` and `**kwargs`
+- [ ] Lambda functions
+- [ ] Scope (LEGB rule)
+- [ ] Closures
+
+### 2.5 OOP in Python 🔴
+- [ ] Classes, `__init__`
+- [ ] `self` parameter
+- [ ] Instance vs class variables
+- [ ] Inheritance, multiple inheritance, MRO
+- [ ] Dunder methods (`__str__`, `__repr__`, `__len__`, `__eq__`)
+- [ ] `@classmethod`, `@staticmethod`, `@property`
+- [ ] Abstract base classes (`abc` module)
+
+### 2.6 Decorators and Context Managers 🟡
+- [ ] Function decorators
+- [ ] `@functools.wraps`
+- [ ] Context manager protocol (`__enter__`, `__exit__`)
+- [ ] `with` statement
+- [ ] `@contextmanager` decorator
+
+### 2.7 Exception Handling 🔴
+- [ ] try-except-else-finally
+- [ ] Built-in exceptions
+- [ ] Custom exceptions
+- [ ] `raise` statement
+
+### 2.8 File I/O and Modules 🔴
+- [ ] `open()`, read/write/append modes
+- [ ] Reading line by line
+- [ ] `with open(...) as f:` pattern
+- [ ] JSON module (`json.loads`, `json.dumps`)
+- [ ] OS, sys, pathlib modules
+
+### 2.9 Virtual Environments 🔴
+- [ ] `venv`, `pip`
+- [ ] `requirements.txt`
+- [ ] `pip freeze`
+- [ ] Conda (awareness)
+
+### 2.10 Async Python 🟡
+- [ ] `async def` and `await`
+- [ ] `asyncio` basics
+- [ ] When to use async (I/O-bound, not CPU-bound)
+
+### 2.11 Type Hints 🟡
+- [ ] Function signatures (`def f(x: int) -> str:`)
+- [ ] `Optional`, `Union`, `List`, `Dict` from `typing`
+- [ ] Pydantic models (for FastAPI / LLM apps)
+
+### 2.12 Common Libraries 🟡
+- [ ] `requests` — HTTP client
+- [ ] `json` — JSON serialization
+- [ ] `os`, `sys`, `pathlib`
+- [ ] `datetime`
+- [ ] `logging`
+- [ ] `numpy` basics (arrays, vectorized ops)
+- [ ] `pandas` basics (DataFrames)
+
+---
+
+## 3. JavaScript
+
+### 3.1 Basics 🔴
+- [ ] `var` vs `let` vs `const`
+- [ ] Hoisting
+- [ ] Scope — global, function, block
+- [ ] Closures
+- [ ] `this` binding (rules)
+- [ ] Strict mode
+
+### 3.2 Functions 🔴
+- [ ] Function declarations vs expressions
+- [ ] Arrow functions (and `this` differences)
+- [ ] Higher-order functions
+- [ ] Callbacks
+- [ ] IIFE (Immediately Invoked Function Expression)
+
+### 3.3 Async JavaScript 🔴
+- [ ] Event loop
+- [ ] Call stack, task queue, microtask queue
+- [ ] Promises (pending, fulfilled, rejected)
+- [ ] `then`, `catch`, `finally`
+- [ ] `async`/`await`
+- [ ] `Promise.all`, `Promise.race`, `Promise.allSettled`
+- [ ] Error handling in async code
+
+### 3.4 Arrays and Objects 🔴
+- [ ] Array methods — `map`, `filter`, `reduce`, `forEach`, `find`, `some`, `every`, `flat`, `flatMap`
+- [ ] Spread `...` and rest operators
+- [ ] Destructuring (array, object)
+- [ ] Object methods — `Object.keys`, `Object.values`, `Object.entries`
+- [ ] Shallow vs deep copy
+
+### 3.5 ES6+ Features 🔴
+- [ ] Template literals
+- [ ] Default parameters
+- [ ] Modules (`import`/`export`)
+- [ ] Classes
+- [ ] Optional chaining (`?.`)
+- [ ] Nullish coalescing (`??`)
+- [ ] Symbols, Maps, Sets
+
+### 3.6 DOM Basics 🟡
+- [ ] `document.getElementById`, `querySelector`
+- [ ] Event listeners
+- [ ] Event bubbling and capturing
+- [ ] `preventDefault`, `stopPropagation`
+
+---
+
+## 4. TypeScript
+
+### 4.1 Basics 🔴
+- [ ] Why TypeScript exists
+- [ ] Static typing benefits
+- [ ] Compilation to JS
+
+### 4.2 Types 🔴
+- [ ] Primitive types (string, number, boolean)
+- [ ] Arrays and tuples
+- [ ] Object types
+- [ ] `any`, `unknown`, `never`, `void`
+- [ ] Union types (`A | B`)
+- [ ] Intersection types (`A & B`)
+- [ ] Literal types
+
+### 4.3 Interfaces and Types 🔴
+- [ ] `interface` keyword
+- [ ] `type` alias
+- [ ] Difference between interface and type
+- [ ] Optional properties (`?:`)
+- [ ] Readonly properties
+
+### 4.4 Generics 🟡
+- [ ] Generic functions
+- [ ] Generic interfaces
+- [ ] Generic constraints
+
+### 4.5 Enums and Advanced 🟡
+- [ ] Enums (numeric, string)
+- [ ] Type guards
+- [ ] Type assertions (`as`)
+- [ ] Utility types — Partial, Required, Pick, Omit, Record
+
+---
+
+# PART B — COMPUTER SCIENCE FUNDAMENTALS
+
+## 5. Data Structures
+
+> [!note] Already cleared HackerRank — just keep sharp for live coding.
+
+### 5.1 Arrays and Strings 🔴
+- [ ] Time complexities of operations
+- [ ] Two-pointer technique
+- [ ] Sliding window technique
+- [ ] Prefix sums
+
+### 5.2 Linked List 🔴
+- [ ] Singly vs doubly linked list
+- [ ] Reverse a linked list
+- [ ] Detect cycle (Floyd's algorithm)
+- [ ] Find middle of linked list
+- [ ] Merge two sorted lists
+
+### 5.3 Stack and Queue 🔴
+- [ ] Stack operations (LIFO)
+- [ ] Queue operations (FIFO)
+- [ ] Deque
+- [ ] Priority Queue / Heap
+- [ ] Common uses (balancing parentheses, BFS, DFS)
+
+### 5.4 HashMap and HashSet 🔴
+- [ ] When to use
+- [ ] Frequency counting
+- [ ] First non-repeating character
+- [ ] Two-sum problem
+
+### 5.5 Trees 🔴
+- [ ] Binary tree vs BST
+- [ ] Traversals — inorder, preorder, postorder, level-order
+- [ ] Recursive vs iterative traversal
+- [ ] Height of tree
+- [ ] Lowest Common Ancestor (concept)
+- [ ] Balanced trees (AVL, red-black — conceptual)
+
+### 5.6 Heap 🟡
+- [ ] Min-heap vs max-heap
+- [ ] Heapify
+- [ ] Heap sort
+- [ ] Top-K problems
+
+### 5.7 Graphs 🟡
+- [ ] Adjacency list vs adjacency matrix
+- [ ] BFS, DFS
+- [ ] Shortest path (Dijkstra concept)
+- [ ] Topological sort (conceptual)
+
+### 5.8 Trie 🟡
+- [ ] Structure
+- [ ] Use cases (autocomplete, prefix search)
+
+---
+
+## 6. Algorithms
+
+### 6.1 Sorting 🔴
+- [ ] Bubble, Selection, Insertion — time/space complexity
+- [ ] Merge sort — divide and conquer, O(n log n)
+- [ ] Quick sort — partitioning, average O(n log n), worst O(n²)
+- [ ] When to use which
+
+### 6.2 Searching 🔴
+- [ ] Linear search
+- [ ] Binary search and variants
+- [ ] Search in rotated sorted array
+
+### 6.3 Recursion and Backtracking 🔴
+- [ ] Base case and recursive case
+- [ ] Recursion tree
+- [ ] Backtracking — N-queens, subsets, permutations
+- [ ] Memoization
+
+### 6.4 Dynamic Programming 🟡
+- [ ] Memoization vs tabulation
+- [ ] Fibonacci, climbing stairs
+- [ ] Knapsack (0/1)
+- [ ] LIS, LCS (concepts)
+
+### 6.5 Greedy 🟡
+- [ ] When greedy works
+- [ ] Activity selection
+- [ ] Coin change (greedy vs DP)
+
+### 6.6 Big-O Analysis 🔴
+- [ ] Time complexity
+- [ ] Space complexity
+- [ ] Best, average, worst case
+- [ ] Asymptotic notations (O, Θ, Ω)
+
+---
+
+## 7. OOP Concepts
+
+> [!info] Language-agnostic OOP — they may ask separately from Java specifics.
+
+- [ ] Class and object
+- [ ] Four pillars — Encapsulation, Inheritance, Polymorphism, Abstraction
+- [ ] SOLID principles
+  - [ ] Single Responsibility
+  - [ ] Open/Closed
+  - [ ] Liskov Substitution
+  - [ ] Interface Segregation
+  - [ ] Dependency Inversion
+- [ ] Composition vs Inheritance
+- [ ] Coupling and Cohesion
+- [ ] Design patterns (awareness) — Singleton, Factory, Observer, Strategy, Decorator
+
+---
+
+## 8. Operating Systems
+
+### 8.1 Basics 🟡
+- [ ] What is an OS
+- [ ] Kernel vs user mode
+- [ ] System calls
+
+### 8.2 Process and Thread 🔴
+- [ ] Process vs Thread
+- [ ] Process states
+- [ ] Context switching
+- [ ] Inter-process communication (IPC) — pipes, shared memory, sockets
+
+### 8.3 Concurrency 🔴
+- [ ] Concurrency vs parallelism
+- [ ] Race conditions
+- [ ] Mutex, semaphore (conceptual)
+- [ ] Deadlock — 4 conditions, prevention
+
+### 8.4 Memory Management 🟡
+- [ ] Virtual memory
+- [ ] Paging
+- [ ] Segmentation
+- [ ] Stack vs heap
+
+### 8.5 Scheduling 🟡
+- [ ] FCFS, SJF, Round Robin, Priority — conceptual
+
+---
+
+## 9. Computer Networks
+
+### 9.1 OSI Model 🟡
+- [ ] 7 layers (Physical, Data Link, Network, Transport, Session, Presentation, Application)
+- [ ] What happens at each layer
+
+### 9.2 TCP/IP 🔴
+- [ ] TCP vs UDP
+- [ ] 3-way handshake
+- [ ] Reliability, ordering, flow control (TCP)
+
+### 9.3 HTTP/HTTPS 🔴
+- [ ] HTTP methods — GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+- [ ] Status codes — 1xx, 2xx, 3xx, 4xx, 5xx (key ones)
+- [ ] Idempotency
+- [ ] HTTP/1.1 vs HTTP/2 vs HTTP/3 (awareness)
+- [ ] HTTPS, TLS/SSL handshake (conceptual)
+
+### 9.4 DNS 🟡
+- [ ] What is DNS
+- [ ] DNS resolution flow
+- [ ] Records (A, AAAA, CNAME, MX)
+
+### 9.5 REST and APIs 🔴
+- [ ] REST principles
+- [ ] REST vs SOAP
+- [ ] REST vs GraphQL vs gRPC
+- [ ] CORS
+
+### 9.6 WebSockets 🟡
+- [ ] Full-duplex communication
+- [ ] Use cases vs polling/SSE
+
+---
+
+# PART C — DATABASES
+
+## 10. SQL
+
+### 10.1 Basics 🔴
+- [ ] SELECT, FROM, WHERE
+- [ ] DISTINCT
+- [ ] ORDER BY, LIMIT, OFFSET
+- [ ] GROUP BY, HAVING
+- [ ] Aggregate functions — COUNT, SUM, AVG, MIN, MAX
+
+### 10.2 JOINs 🔴
+- [ ] INNER JOIN
+- [ ] LEFT JOIN / LEFT OUTER JOIN
+- [ ] RIGHT JOIN
+- [ ] FULL OUTER JOIN
+- [ ] SELF JOIN
+- [ ] CROSS JOIN
+
+### 10.3 Subqueries and CTEs 🔴
+- [ ] Subqueries (scalar, row, table)
+- [ ] Correlated subqueries
+- [ ] CTEs (`WITH` clause)
+- [ ] Recursive CTEs
+
+### 10.4 Window Functions 🟡
+- [ ] `ROW_NUMBER()`
+- [ ] `RANK()`, `DENSE_RANK()`
+- [ ] `LAG()`, `LEAD()`
+- [ ] `OVER (PARTITION BY ... ORDER BY ...)`
+
+### 10.5 DDL and DML 🔴
+- [ ] CREATE, ALTER, DROP, TRUNCATE
+- [ ] INSERT, UPDATE, DELETE
+- [ ] Constraints — PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL, CHECK
+
+### 10.6 Indexes 🔴
+- [ ] What are indexes
+- [ ] Clustered vs non-clustered
+- [ ] B-tree index
+- [ ] Composite indexes
+- [ ] When they help vs hurt
+- [ ] Index on low-cardinality columns is wasteful
+
+---
+
+## 11. DBMS Concepts
+
+### 11.1 Normalization 🔴
+- [ ] 1NF, 2NF, 3NF, BCNF — definitions and examples
+- [ ] Denormalization (when and why)
+
+### 11.2 Transactions 🔴
+- [ ] ACID properties
+  - [ ] Atomicity
+  - [ ] Consistency
+  - [ ] Isolation
+  - [ ] Durability
+- [ ] COMMIT, ROLLBACK, SAVEPOINT
+
+### 11.3 Isolation Levels 🔴
+- [ ] Read Uncommitted
+- [ ] Read Committed
+- [ ] Repeatable Read
+- [ ] Serializable
+- [ ] Dirty read, non-repeatable read, phantom read
+
+### 11.4 Locking 🟡
+- [ ] Optimistic vs pessimistic locking
+- [ ] Shared lock vs exclusive lock
+- [ ] Deadlock in DB
+
+### 11.5 SQL vs NoSQL 🔴
+- [ ] When to use each
+- [ ] CAP theorem
+- [ ] BASE vs ACID
+
+---
+
+## 12. NoSQL
+
+### 12.1 Document DB (MongoDB) 🟡
+- [ ] Documents and collections
+- [ ] BSON
+- [ ] Use cases
+
+### 12.2 Key-Value (Redis) 🟡
+- [ ] Caching use cases
+- [ ] Data structures (strings, lists, sets, hashes, sorted sets)
+- [ ] TTL, expiration
+- [ ] Pub/Sub
+
+### 12.3 Vector DB 🔴 (also covered in Part G)
+- [ ] How it differs from regular DB
+- [ ] Why needed for RAG
+
+---
+
+# PART D — BACKEND (JAVA + SPRING)
+
+## 13. Spring Core
+
+### 13.1 IoC and DI 🔴
+- [ ] Inversion of Control concept
+- [ ] Dependency Injection
+- [ ] DI types — constructor, setter, field
+- [ ] Why constructor injection is preferred
+- [ ] BeanFactory vs ApplicationContext
+
+### 13.2 Beans 🔴
+- [ ] What is a Spring bean
+- [ ] Bean scopes — singleton, prototype, request, session, application
+- [ ] Bean lifecycle
+- [ ] `@PostConstruct`, `@PreDestroy`
+
+### 13.3 Annotations 🔴
+- [ ] `@Component`
+- [ ] `@Service`
+- [ ] `@Repository`
+- [ ] `@Controller` vs `@RestController`
+- [ ] `@Autowired`
+- [ ] `@Qualifier`
+- [ ] `@Primary`
+- [ ] `@Value` (property injection)
+- [ ] `@Configuration` and `@Bean`
+
+### 13.4 Configuration 🟡
+- [ ] XML vs Java vs Annotation-based config
+- [ ] Profiles (`@Profile`, `spring.profiles.active`)
+- [ ] `application.properties` vs `application.yml`
+
+---
+
+## 14. Spring Boot
+
+### 14.1 Basics 🔴
+- [ ] What Spring Boot solves
+- [ ] Convention over configuration
+- [ ] Embedded server (Tomcat by default)
+- [ ] Spring Boot Starters
+- [ ] Auto-configuration (how it works conceptually)
+- [ ] `@SpringBootApplication` annotation breakdown
+
+### 14.2 REST APIs 🔴
+- [ ] `@RestController`
+- [ ] `@RequestMapping`, `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`
+- [ ] `@PathVariable`
+- [ ] `@RequestParam`
+- [ ] `@RequestBody`
+- [ ] `ResponseEntity`
+- [ ] HTTP status codes — when to use 200, 201, 204, 400, 401, 403, 404, 409, 422, 500
+
+### 14.3 Exception Handling 🔴
+- [ ] `@ExceptionHandler`
+- [ ] `@ControllerAdvice` / `@RestControllerAdvice`
+- [ ] Custom exceptions
+- [ ] Global error response structure
+
+### 14.4 Validation 🔴
+- [ ] `@Valid`
+- [ ] Bean Validation annotations — `@NotNull`, `@NotBlank`, `@Size`, `@Email`, `@Min`, `@Max`, `@Pattern`
+- [ ] Custom validators
+
+### 14.5 Actuator and Observability 🟡
+- [ ] `/actuator/health`, `/actuator/info`, `/actuator/metrics`
+- [ ] Custom health indicators
+- [ ] Prometheus integration
+
+### 14.6 Testing 🟡
+- [ ] `@SpringBootTest`
+- [ ] `@WebMvcTest`, `@DataJpaTest`
+- [ ] MockMvc
+- [ ] Mockito basics
+
+---
+
+## 15. Spring Data JPA + Hibernate
+
+### 15.1 JPA Basics 🔴
+- [ ] Entity (`@Entity`, `@Table`)
+- [ ] Primary key (`@Id`, `@GeneratedValue`)
+- [ ] Column mapping (`@Column`)
+- [ ] Relationships — `@OneToOne`, `@OneToMany`, `@ManyToOne`, `@ManyToMany`
+- [ ] `@JoinColumn`
+
+### 15.2 Repositories 🔴
+- [ ] `JpaRepository`, `CrudRepository`, `PagingAndSortingRepository`
+- [ ] Derived query methods (`findByName`, `findByAgeGreaterThan`)
+- [ ] `@Query` with JPQL
+- [ ] Native queries
+- [ ] Pagination (`Pageable`, `Page<T>`)
+- [ ] Sorting
+
+### 15.3 Hibernate Concepts 🔴
+- [ ] Entity lifecycle — transient, persistent, detached, removed
+- [ ] First-level vs second-level cache
+- [ ] Lazy vs eager loading
+- [ ] N+1 problem and solutions (`JOIN FETCH`, `@EntityGraph`)
+- [ ] Cascade types
+- [ ] `@Transactional` — propagation, isolation, rollback rules
+- [ ] `flush()` vs `commit()`
+
+---
+
+## 16. Spring Security + JWT
+
+### 16.1 Spring Security Basics 🔴
+- [ ] Authentication vs Authorization
+- [ ] SecurityFilterChain (modern Spring Security)
+- [ ] UserDetailsService
+- [ ] PasswordEncoder (BCrypt)
+- [ ] CSRF protection
+- [ ] CORS configuration
+
+### 16.2 JWT 🔴
+- [ ] JWT structure — header.payload.signature
+- [ ] Signing algorithms (HS256, RS256)
+- [ ] Access token vs refresh token
+- [ ] Token expiration
+- [ ] Stateless authentication
+- [ ] JWT vs session-based auth
+
+### 16.3 RBAC 🔴
+- [ ] Roles vs Authorities/Permissions
+- [ ] `@PreAuthorize`, `@PostAuthorize`
+- [ ] `hasRole`, `hasAuthority`
+- [ ] Method-level security
+
+---
+
+## 17. Spring Cloud + Microservices
+
+### 17.1 Microservices Concepts 🔴
+- [ ] Monolith vs microservices — trade-offs
+- [ ] Bounded context (DDD)
+- [ ] Service decomposition strategies
+- [ ] Twelve-factor app principles
+
+### 17.2 Service Discovery 🔴
+- [ ] Eureka — server and client
+- [ ] Self-registration
+- [ ] Heartbeats
+- [ ] Why service discovery matters
+
+### 17.3 API Gateway 🔴
+- [ ] Spring Cloud Gateway
+- [ ] Routing
+- [ ] Filters (pre, post)
+- [ ] Why an API gateway
+
+### 17.4 Inter-service Communication 🔴
+- [ ] RestTemplate (legacy)
+- [ ] WebClient (reactive)
+- [ ] OpenFeign (declarative)
+- [ ] Sync vs async
+
+### 17.5 Resilience Patterns 🔴
+- [ ] Circuit Breaker — Closed, Open, Half-Open
+- [ ] Resilience4J
+- [ ] Bulkhead pattern
+- [ ] Retry pattern
+- [ ] Rate limiter
+- [ ] Timeout
+
+### 17.6 Distributed Concepts 🟡
+- [ ] Saga pattern
+- [ ] CQRS
+- [ ] Event sourcing
+- [ ] Eventual consistency
+- [ ] Distributed tracing — Zipkin, Jaeger (awareness)
+
+### 17.7 Messaging 🟡
+- [ ] Kafka basics — topics, partitions, consumer groups
+- [ ] RabbitMQ (awareness)
+- [ ] When to use messaging vs sync REST
+
+---
+
+# PART E — FRONTEND
+
+## 18. HTML
+
+- [ ] Semantic HTML (header, nav, main, section, article, footer)
+- [ ] Forms and inputs
+- [ ] Accessibility (alt, aria-label)
+- [ ] Meta tags (viewport, charset)
+
+---
+
+## 19. CSS + Bootstrap
+
+### 19.1 CSS 🟡
+- [ ] Box model
+- [ ] Display (block, inline, inline-block, flex, grid)
+- [ ] Position (static, relative, absolute, fixed, sticky)
+- [ ] Flexbox basics
+- [ ] CSS Grid basics
+- [ ] Media queries (responsive design)
+- [ ] Selectors and specificity
+
+### 19.2 Bootstrap 5 🟡
+- [ ] Grid system (12 columns)
+- [ ] Breakpoints (xs, sm, md, lg, xl, xxl)
+- [ ] Components (buttons, cards, modals, navbar)
+- [ ] Utility classes
+
+---
+
+## 20. React
+
+### 20.1 Basics 🔴
+- [ ] What React is and why
+- [ ] Virtual DOM
+- [ ] JSX — rules, pitfalls
+- [ ] Components (functional only — class is legacy)
+- [ ] Props and prop drilling
+- [ ] State
+
+### 20.2 Hooks 🔴
+- [ ] `useState`
+- [ ] `useEffect` — dependency array, cleanup
+- [ ] `useContext`
+- [ ] `useRef`
+- [ ] `useMemo`
+- [ ] `useCallback`
+- [ ] `useReducer`
+- [ ] Custom hooks
+- [ ] Rules of hooks
+
+### 20.3 Rendering 🔴
+- [ ] Conditional rendering
+- [ ] Lists and keys
+- [ ] Why keys matter
+- [ ] Fragments
+- [ ] Composition vs inheritance
+
+### 20.4 Forms 🟡
+- [ ] Controlled vs uncontrolled components
+- [ ] Form submission
+- [ ] Validation
+
+### 20.5 Routing 🟡
+- [ ] React Router (BrowserRouter, Route, Link, useNavigate, useParams)
+- [ ] Nested routes
+- [ ] Protected routes
+
+### 20.6 Data Fetching 🔴
+- [ ] `fetch` API
+- [ ] `axios`
+- [ ] Loading and error states
+- [ ] When to fetch (useEffect)
+- [ ] Aborting requests
+
+### 20.7 React 18 🔴
+- [ ] `createRoot` (replacing `ReactDOM.render`)
+- [ ] Automatic batching
+- [ ] Concurrent features (transitions) — awareness
+- [ ] Strict Mode
+
+### 20.8 State Management 🟡
+- [ ] Lifting state up
+- [ ] Context API
+- [ ] Redux basics (awareness)
+
+---
+
+# PART F — SYSTEM DESIGN
+
+## 21. System Design Fundamentals
+
+### 21.1 Core Concepts 🔴
+- [ ] Client-server model
+- [ ] Monolith vs microservices
+- [ ] Vertical vs horizontal scaling
+- [ ] Stateless vs stateful services
+
+### 21.2 Load Balancing 🔴
+- [ ] What and why
+- [ ] Algorithms — round robin, least connections, IP hash, weighted
+- [ ] Sticky sessions
+- [ ] L4 vs L7 load balancers
+
+### 21.3 Caching 🔴
+- [ ] Client-side, CDN, server-side
+- [ ] In-memory (Redis, Memcached)
+- [ ] Cache strategies — Cache-Aside, Read-Through, Write-Through, Write-Behind
+- [ ] Cache invalidation
+- [ ] TTL
+
+### 21.4 Database Scaling 🔴
+- [ ] Vertical scaling
+- [ ] Read replicas
+- [ ] Sharding strategies (range, hash, geo)
+- [ ] Master-slave vs master-master
+
+### 21.5 Messaging 🟡
+- [ ] When to use a queue
+- [ ] Kafka vs RabbitMQ vs SQS
+- [ ] Pub/Sub vs queue
+
+### 21.6 API Design 🔴
+- [ ] REST vs GraphQL vs gRPC
+- [ ] Versioning (URL, header)
+- [ ] Pagination strategies
+- [ ] Rate limiting
+
+### 21.7 Distributed Systems 🟡
+- [ ] CAP theorem
+- [ ] Eventual consistency vs strong consistency
+- [ ] Idempotency
+- [ ] Distributed transactions (Saga)
+
+### 21.8 Auth 🔴
+- [ ] OAuth 2.0 flow (awareness)
+- [ ] OpenID Connect
+- [ ] SSO
+- [ ] JWT vs session
+
+---
+
+## 22. AI-Specific System Design
+
+### 22.1 RAG at Scale 🔴
+- [ ] Indexing pipeline (offline)
+- [ ] Query pipeline (online)
+- [ ] Vector DB scaling
+- [ ] Caching retrieval results
+- [ ] Reranking trade-offs
+
+### 22.2 LLM Gateway 🔴
+- [ ] Single entry point for all LLM calls
+- [ ] Routing, caching, rate limiting, observability
+- [ ] Provider abstraction (OpenAI / Anthropic / Bedrock)
+
+### 22.3 AI Service Architecture 🔴
+- [ ] Separate AI microservice vs embedded
+- [ ] Sync vs async LLM calls
+- [ ] Streaming responses
+- [ ] Worker pattern for long-running LLM jobs
+
+### 22.4 Cost & Latency Design 🔴
+- [ ] Model routing (cheap → expensive cascade)
+- [ ] Semantic caching
+- [ ] Batching
+- [ ] Async LLM calls
+
+---
+
+# PART G — AI / LLM (FULL MODULE)
+
+> [!warning] This is the differentiator for Ace Team. Treat every 🔴 topic as must-know.
+
+## 23. LLM Fundamentals 🔴
 
 - [ ] What is an LLM (high-level)
 - [ ] Transformer architecture (conceptual, not math)
@@ -40,7 +1078,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Popular model families — GPT, Claude, Llama, Mistral, Gemini, Qwen, DeepSeek
 - [ ] Multimodal models (text + image + audio)
 
-# 2. Tokens and Tokenization 🔴
+## 24. Tokens and Tokenization 🔴
 
 - [ ] What is a token
 - [ ] Tokenization algorithms — BPE, WordPiece, SentencePiece
@@ -49,7 +1087,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Why non-English uses more tokens
 - [ ] Tokenizers per model (tiktoken for OpenAI)
 
-# 3. Context Window 🔴
+## 25. Context Window 🔴
 
 - [ ] What is context window
 - [ ] Input + output budget
@@ -57,7 +1095,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] "Lost in the middle" problem
 - [ ] Trade-offs of large context
 
-# 4. Generation Parameters 🔴
+## 26. Generation Parameters 🔴
 
 - [ ] Temperature
 - [ ] Top-p (nucleus sampling)
@@ -70,7 +1108,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Log probabilities (logprobs)
 - [ ] Streaming flag
 
-# 5. Embeddings 🔴
+## 27. Embeddings 🔴
 
 - [ ] What is an embedding (vector representation)
 - [ ] Embedding dimensions (384, 768, 1024, 1536, 3072)
@@ -85,7 +1123,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Multilingual embeddings
 - [ ] Re-embedding when changing models
 
-# 6. Fine-tuning vs Prompting vs RAG 🔴
+## 28. Fine-tuning vs Prompting vs RAG 🔴
 
 - [ ] What each does
 - [ ] When to use each
@@ -97,7 +1135,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] PEFT (Parameter Efficient Fine-Tuning) — conceptual
 - [ ] Instruction tuning vs domain fine-tuning
 
-# 7. Hallucinations 🔴
+## 29. Hallucinations 🔴
 
 - [ ] What hallucinations are
 - [ ] Why LLMs hallucinate
@@ -105,7 +1143,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Mitigation techniques — RAG, low temperature, prompt instructions, structured outputs, citation enforcement, fact-checking pipelines, guardrails, human-in-the-loop
 - [ ] Hallucination detection methods
 
-# 8. Prompt Engineering 🔴
+## 30. Prompt Engineering 🔴
 
 - [ ] Anatomy of a prompt (system / user / assistant)
 - [ ] Zero-shot prompting
@@ -127,7 +1165,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Prompt versioning
 - [ ] Prompt A/B testing
 
-# 9. Structured Outputs 🔴
+## 31. Structured Outputs 🔴
 
 - [ ] Why structured outputs matter
 - [ ] JSON mode (OpenAI, Anthropic)
@@ -138,7 +1176,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Retry on schema violation
 - [ ] Constrained decoding (Outlines, Guidance) — conceptual
 
-# 10. Prompt Injection and Security 🟡
+## 32. Prompt Injection and Security 🟡
 
 - [ ] Direct prompt injection
 - [ ] Indirect prompt injection (in retrieved docs)
@@ -148,7 +1186,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Azure Content Safety
 - [ ] LlamaGuard
 
-# 11. RAG — Retrieval Augmented Generation 🔴
+## 33. RAG — Retrieval Augmented Generation 🔴
 
 - [ ] What RAG is and why
 - [ ] Full pipeline (load → chunk → embed → store → retrieve → augment → generate)
@@ -156,7 +1194,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] When RAG helps vs hurts
 - [ ] RAG vs long context
 
-# 12. Document Loading (RAG Step 1) 🟡
+## 34. Document Loading 🟡
 
 - [ ] File formats — PDF, DOCX, HTML, Markdown, CSV, JSON, TXT
 - [ ] PDF parsers — PyPDF, PDFPlumber, Unstructured, PyMuPDF
@@ -166,7 +1204,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Web loaders
 - [ ] Metadata preservation (source, page, section)
 
-# 13. Chunking (RAG Step 2) 🔴
+## 35. Chunking 🔴
 
 - [ ] Why chunking matters
 - [ ] Fixed-size chunking
@@ -181,7 +1219,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Chunk overlap (why and how much)
 - [ ] Metadata per chunk
 
-# 14. Embedding for RAG (RAG Step 3) 🟡
+## 36. Embedding for RAG 🟡
 
 - [ ] Choosing embedding model
 - [ ] Batching embeddings
@@ -190,7 +1228,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Domain adaptation
 - [ ] Cost of embedding (per token)
 
-# 15. Vector Databases (RAG Step 4) 🔴
+## 37. Vector Databases 🔴
 
 - [ ] What a vector DB does
 - [ ] Exact search vs Approximate Nearest Neighbor (ANN)
@@ -206,7 +1244,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Scaling vector DBs (sharding, replication)
 - [ ] Cost considerations
 
-# 16. Retrieval (RAG Step 5–6) 🔴
+## 38. Retrieval 🔴
 
 - [ ] Top-k retrieval
 - [ ] Choosing k
@@ -221,7 +1259,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Query expansion / rewriting
 - [ ] Query decomposition
 
-# 17. Reranking (RAG Step 7) 🟡
+## 39. Reranking 🟡
 
 - [ ] Why rerank
 - [ ] Bi-encoder vs cross-encoder
@@ -231,7 +1269,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] ColBERT (late interaction) — conceptual
 - [ ] LLM-as-reranker
 
-# 18. Prompt Augmentation (RAG Step 8) 🟡
+## 40. Prompt Augmentation 🟡
 
 - [ ] Context injection patterns
 - [ ] Citation prompts
@@ -239,7 +1277,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Handling no-results case
 - [ ] Quote-and-answer pattern
 
-# 19. RAG Evaluation 🔴
+## 41. RAG Evaluation 🔴
 
 - [ ] Why evaluation is hard
 - [ ] RAGAS framework
@@ -255,7 +1293,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Golden test sets / regression tests
 - [ ] A/B testing in production
 
-# 20. Advanced RAG Patterns 🟡
+## 42. Advanced RAG Patterns 🟡
 
 - [ ] Conversational RAG (chat history rewriting)
 - [ ] Multi-hop RAG
@@ -266,38 +1304,38 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Adaptive RAG (route by query type)
 - [ ] Long-context vs RAG trade-offs
 
-# 21. LLM Orchestration Frameworks 🔴 (LangChain) / 🟡 (others)
+## 43. LLM Orchestration Frameworks
 
-## LangChain 🔴
+### LangChain 🔴
 - [ ] Core abstractions (LLM, PromptTemplate, OutputParser, Chain, Retriever, VectorStore, Memory, Agent, Tool, Document)
 - [ ] LCEL (LangChain Expression Language)
 - [ ] When to use, when not to
 
-## LangGraph 🟡
+### LangGraph 🟡
 - [ ] State machines for agents
 - [ ] Nodes, edges, state
 - [ ] When to use
 
-## LlamaIndex 🟡
+### LlamaIndex 🟡
 - [ ] RAG-first framework
 - [ ] Query engines
 - [ ] Index types
 
-## CrewAI 🟡
+### CrewAI 🟡
 - [ ] Multi-agent collaboration
 - [ ] Roles, goals, tools
 
-## AutoGen 🟡
+### AutoGen 🟡
 - [ ] Microsoft's multi-agent framework
 - [ ] Conversation patterns
 
-## Others 🟡
+### Others 🟡
 - [ ] Haystack
 - [ ] Semantic Kernel (Microsoft)
 - [ ] DSPy (prompt optimization)
 - [ ] Direct SDK usage (when to skip frameworks)
 
-# 22. Agentic Workflows 🔴
+## 44. Agentic Workflows 🔴
 
 - [ ] What is an agent
 - [ ] Plain LLM vs RAG vs Agent
@@ -317,7 +1355,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Agent failure modes — loops, hallucinated tool calls, cost explosion
 - [ ] Agent observability and debugging
 
-# 23. Memory in LLM Apps 🟡
+## 45. Memory in LLM Apps 🟡
 
 - [ ] No memory (stateless)
 - [ ] Conversation buffer memory
@@ -328,7 +1366,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Long-term memory vs session memory
 - [ ] Memory persistence (Redis, SQL)
 
-# 24. AI Evaluation & Metrics 🟡
+## 46. AI Evaluation and Metrics 🟡
 
 - [ ] Why LLM evaluation is hard
 - [ ] Reference-based metrics — BLEU, ROUGE, METEOR, F1, exact match
@@ -345,7 +1383,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Robustness testing
 - [ ] Adversarial testing
 
-# 25. Guardrails 🔴
+## 47. Guardrails 🔴
 
 - [ ] Input guardrails — PII detection, prompt injection detection, toxicity, rate limiting
 - [ ] Output guardrails — schema validation, PII redaction, toxicity filters, factuality checks, business rules
@@ -355,7 +1393,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Custom validators
 - [ ] Microsoft Presidio (PII)
 
-# 26. Cost Optimization 🔴
+## 48. Cost Optimization 🔴
 
 - [ ] Token-level — shorter prompts, prompt caching, compression
 - [ ] Provider-side prompt caching (Anthropic, OpenAI)
@@ -366,7 +1404,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Cost monitoring and budgets
 - [ ] Cost per query / per user calculations
 
-# 27. Latency Optimization 🔴
+## 49. Latency Optimization 🔴
 
 - [ ] Streaming responses (SSE, WebSocket)
 - [ ] Smaller models for latency-sensitive paths
@@ -378,7 +1416,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Async vs sync calls
 - [ ] Time to first token (TTFT) vs total latency
 
-# 28. Caching Strategies 🟡
+## 50. Caching Strategies 🟡
 
 - [ ] Exact-match cache
 - [ ] Semantic cache (embedding-based)
@@ -387,7 +1425,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] TTL strategies
 - [ ] Cache invalidation
 
-# 29. Monitoring and Observability 🟡
+## 51. Monitoring and Observability 🟡
 
 - [ ] What to log (inputs, outputs, latency, tokens, cost, errors, feedback)
 - [ ] LangSmith
@@ -401,7 +1439,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Hallucination rate sampling
 - [ ] User feedback signals (thumbs up/down)
 
-# 30. Fallback and Degradation 🟡
+## 52. Fallback and Degradation 🟡
 
 - [ ] Retry with exponential backoff
 - [ ] Model failover (primary → secondary provider)
@@ -411,7 +1449,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Schema-validation retry
 - [ ] Rate limit handling
 
-# 31. Responsible AI 🟡
+## 53. Responsible AI 🟡
 
 - [ ] Bias in training data
 - [ ] Fairness across demographics
@@ -426,7 +1464,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] RBI guidelines for AI in financial services (relevant to AcquirerX)
 - [ ] EU AI Act — conceptual
 
-# 32. Security and Privacy 🔴
+## 54. Security and Privacy (LLM) 🔴
 
 - [ ] PII handling — detection, redaction, re-injection
 - [ ] Microsoft Presidio
@@ -441,9 +1479,9 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Model output risks — harmful content, copyright, fake citations
 - [ ] Sandbox for agent tool execution
 
-# 33. LLM APIs and SDKs 🟡
+## 55. LLM APIs and SDKs 🟡
 
-## OpenAI API
+### OpenAI API
 - [ ] Chat completions
 - [ ] Embeddings
 - [ ] Moderations
@@ -453,14 +1491,14 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Streaming
 - [ ] Rate limits and tiers
 
-## Anthropic Claude API
+### Anthropic Claude API
 - [ ] Messages endpoint
 - [ ] System prompt as separate field
 - [ ] Tool use
 - [ ] Vision
 - [ ] Prompt caching
 
-## Others
+### Others
 - [ ] Google Gemini API
 - [ ] Hugging Face — transformers library, sentence-transformers, datasets, Inference Endpoints
 - [ ] AWS Bedrock — multi-provider gateway, IAM-based access, VPC integration
@@ -471,7 +1509,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] vLLM (high-throughput serving)
 - [ ] Text Generation Inference (TGI)
 
-# 34. Design Patterns and Architecture 🟡
+## 56. Design Patterns and Architecture 🟡
 
 - [ ] RAG Q&A pattern
 - [ ] Conversational RAG
@@ -487,7 +1525,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Asynchronous LLM jobs
 - [ ] Event-driven AI (Kafka + LLM)
 
-# 35. LLM Gateway (Important) 🟡
+## 57. LLM Gateway 🟡
 
 - [ ] Why use a gateway
 - [ ] LiteLLM
@@ -495,7 +1533,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Custom gateway (e.g., Spring Boot) — your differentiator
 - [ ] Responsibilities — auth, rate limiting, cost tracking, logging, routing, caching, fallback
 
-# 36. Multimodal AI (Awareness Level) 🟡
+## 58. Multimodal AI 🟡
 
 - [ ] Vision models — GPT-4V, Claude Vision, Gemini Vision
 - [ ] OCR vs vision LLMs
@@ -504,7 +1542,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Image generation — DALL-E, Stable Diffusion, Flux
 - [ ] Use cases for multimodal in enterprise
 
-# 37. Open-source Model Deployment (Awareness) 🟡
+## 59. Open-source Model Deployment 🟡
 
 - [ ] Hugging Face Inference Endpoints
 - [ ] vLLM
@@ -515,7 +1553,201 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Quantization (GGUF, AWQ, GPTQ) — conceptual
 - [ ] GPU vs CPU inference
 
-# 38. Common Interview Questions (Rehearse Aloud) 🔴
+---
+
+# PART H — CLOUD + DEVOPS
+
+## 60. AWS
+
+### 60.1 Compute 🔴
+- [ ] EC2 — instance types, AMIs, EBS volumes
+- [ ] Lambda — serverless, event-driven
+- [ ] ECS / EKS / Fargate (awareness)
+
+### 60.2 Storage 🔴
+- [ ] S3 — buckets, storage classes, versioning, lifecycle
+- [ ] EBS, EFS (awareness)
+- [ ] Glacier (archival)
+
+### 60.3 Database 🔴
+- [ ] RDS — managed databases (MySQL, PostgreSQL)
+- [ ] DynamoDB (NoSQL, awareness)
+- [ ] ElastiCache (Redis/Memcached)
+
+### 60.4 Networking 🟡
+- [ ] VPC, subnets (public, private)
+- [ ] Security Groups, NACLs
+- [ ] Route 53 (DNS)
+- [ ] ELB (ALB, NLB)
+- [ ] CloudFront (CDN)
+
+### 60.5 IAM and Security 🔴
+- [ ] Users, groups, roles, policies
+- [ ] Principle of least privilege
+- [ ] Access keys vs IAM roles
+- [ ] MFA
+
+### 60.6 Monitoring 🟡
+- [ ] CloudWatch — logs, metrics, alarms
+- [ ] CloudTrail (audit)
+
+### 60.7 Messaging 🟡
+- [ ] SNS (pub/sub)
+- [ ] SQS (queue)
+- [ ] EventBridge
+
+### 60.8 AI/ML on AWS 🔴
+- [ ] Bedrock (managed LLM service, important for Ace Team)
+- [ ] SageMaker (awareness)
+- [ ] Comprehend (NLP)
+- [ ] Textract (OCR)
+
+### 60.9 SAA-C03 Focus 🟡
+- [ ] Well-Architected Framework — 5 pillars
+- [ ] Auto Scaling
+- [ ] High Availability vs Fault Tolerance
+
+---
+
+## 61. Docker
+
+### 61.1 Concepts 🔴
+- [ ] Image vs container
+- [ ] Dockerfile — FROM, RUN, COPY, CMD, ENTRYPOINT, EXPOSE, WORKDIR, ENV, ARG
+- [ ] Image layers and caching
+- [ ] Multi-stage builds
+
+### 61.2 Commands 🔴
+- [ ] `docker build`
+- [ ] `docker run`
+- [ ] `docker ps`, `docker ps -a`
+- [ ] `docker logs`
+- [ ] `docker exec`
+- [ ] `docker stop`, `docker rm`, `docker rmi`
+- [ ] `docker images`
+
+### 61.3 Networking and Storage 🔴
+- [ ] Bridge, host, none networks
+- [ ] Volumes vs bind mounts
+- [ ] Why volumes for persistence
+
+### 61.4 docker-compose 🔴
+- [ ] Multi-container apps
+- [ ] `docker-compose.yml` structure
+- [ ] `depends_on`, networks, volumes
+
+### 61.5 Best Practices 🟡
+- [ ] Small base images (alpine)
+- [ ] Non-root user
+- [ ] `.dockerignore`
+- [ ] Don't store secrets in images
+
+---
+
+## 62. Kubernetes
+
+### 62.1 Why K8s 🟡
+- [ ] Orchestration problem
+- [ ] Docker alone vs K8s
+
+### 62.2 Core Objects 🟡
+- [ ] Pods
+- [ ] Deployments
+- [ ] Services (ClusterIP, NodePort, LoadBalancer)
+- [ ] ConfigMaps
+- [ ] Secrets
+- [ ] Namespaces
+
+### 62.3 kubectl 🟡
+- [ ] `kubectl get`, `describe`, `apply`, `delete`
+- [ ] `kubectl logs`, `exec`
+
+---
+
+## 63. CI/CD
+
+### 63.1 Concepts 🔴
+- [ ] CI vs CD vs Continuous Deployment
+- [ ] Build → Test → Deploy
+- [ ] Pipeline as code
+
+### 63.2 GitHub Actions 🟡
+- [ ] Workflows, jobs, steps
+- [ ] Triggers (push, pull_request, schedule)
+- [ ] Secrets and environment variables
+- [ ] Matrix builds
+
+### 63.3 Jenkins 🟡
+- [ ] Pipeline (declarative)
+- [ ] Stages and steps
+- [ ] Jenkinsfile
+
+---
+
+## 64. Git
+
+### 64.1 Basics 🔴
+- [ ] `clone`, `init`, `status`, `add`, `commit`, `push`, `pull`, `fetch`
+- [ ] Working directory vs staging area vs repository
+
+### 64.2 Branching 🔴
+- [ ] `branch`, `checkout`, `switch`
+- [ ] Merging vs rebasing
+- [ ] Fast-forward vs three-way merge
+- [ ] Conflict resolution
+
+### 64.3 Advanced 🟡
+- [ ] `stash`
+- [ ] `reset` (soft, mixed, hard)
+- [ ] `revert`
+- [ ] `cherry-pick`
+- [ ] `tag`
+- [ ] `.gitignore`
+
+### 64.4 Workflows 🟡
+- [ ] Git Flow
+- [ ] GitHub Flow
+- [ ] Pull Request workflow
+- [ ] Code review etiquette
+
+---
+
+## 65. Linux Basics
+
+### 65.1 Commands 🔴
+- [ ] `ls`, `cd`, `pwd`, `mkdir`, `rm`, `cp`, `mv`
+- [ ] `cat`, `less`, `head`, `tail`
+- [ ] `grep`, `awk`, `sed`, `find`
+- [ ] `chmod`, `chown`
+- [ ] `ps`, `top`, `htop`, `kill`
+- [ ] `df`, `du`, `free`
+
+### 65.2 Pipes and Redirection 🔴
+- [ ] `|` pipe
+- [ ] `>`, `>>` redirect
+- [ ] `<` input redirect
+- [ ] `&&`, `||`, `;`
+
+### 65.3 File Permissions 🟡
+- [ ] rwx for owner/group/others
+- [ ] Numeric vs symbolic
+- [ ] sudo
+
+### 65.4 Environment 🟡
+- [ ] Env variables (`$PATH`, `$HOME`)
+- [ ] `.bashrc`, `.profile`
+- [ ] `export`
+
+### 65.5 SSH 🟡
+- [ ] `ssh user@host`
+- [ ] Key-based auth
+- [ ] `scp`, `rsync`
+
+---
+
+# PART I — INTERVIEW-SPECIFIC
+
+## 66. Common AI Interview Questions 🔴
 
 - [ ] Explain RAG to a non-technical person
 - [ ] How to reduce hallucinations
@@ -530,7 +1762,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Design a RAG system for X
 - [ ] Pick a vector DB and justify
 
-# 39. Care++ Specific (Your Project) 🔴
+## 67. Care++ Specific 🔴
 
 - [ ] Why FAISS
 - [ ] Chunking strategy and parameters
@@ -544,7 +1776,7 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Scaling Care++ (vector DB scaling, multi-tenancy)
 - [ ] PII / HIPAA-equivalent handling
 
-# 40. AcquirerX + AI (Your Differentiator) 🔴
+## 68. AcquirerX + AI Differentiator 🔴
 
 - [ ] RAG over compliance documents (PCI-DSS, RBI, internal SOPs)
 - [ ] LLM-powered transaction anomaly summarization
@@ -556,9 +1788,9 @@ Sections: 10, 12, 14, 17, 18, 20, 21 (other frameworks), 23, 24, 28, 29, 30, 31,
 - [ ] Integration with existing JWT auth and observability
 - [ ] Cost and latency considerations for fintech
 
-# 41. AI Coding Assistants (JD-Mandated) 🔴
+## 69. AI Coding Assistants (JD-Mandated) 🔴
 
-The JD explicitly mentions "ship at 2x velocity using AI coding assistants". Be ready.
+> [!quote] The JD literally says "ship at 2x velocity using AI coding assistants". Be ready.
 
 - [ ] GitHub Copilot — autocomplete, inline suggestions, when it helps vs hurts
 - [ ] Claude Code / Cursor / Windsurf — agentic coding tools
@@ -570,16 +1802,140 @@ The JD explicitly mentions "ship at 2x velocity using AI coding assistants". Be 
 - [ ] Treating AI output like a junior developer's PR (always review)
 - [ ] Your honest personal workflow with AI tools — what you use, when, why
 
-**Sample answer to rehearse:**
+> [!example] Sample answer to rehearse
 > "I use Claude for architectural discussions and complex debugging, Copilot for boilerplate and test generation. I always review AI-generated code carefully — I treat it like a junior developer's PR. The productivity gain is real but it requires discipline to not blindly accept output, especially for security-sensitive code in a payments platform like AcquirerX."
+
+## 70. Behavioral / HR Round 🔴
+
+### 70.1 Standard Questions
+- [ ] Tell me about yourself (60-second pitch)
+- [ ] Why Cognizant
+- [ ] Why Ace Team specifically
+- [ ] Walk me through your strongest project
+- [ ] Strengths and weaknesses
+- [ ] A bug or failure and what you learned
+- [ ] Team conflict story
+- [ ] Time you handled pressure / tight deadline
+- [ ] Where do you see yourself in 3-5 years
+- [ ] Why should we hire you over other candidates
+- [ ] Are you willing to relocate anywhere in India
+- [ ] Any questions for us?
+
+### 70.2 STAR Method 🔴
+- [ ] Situation
+- [ ] Task
+- [ ] Action
+- [ ] Result
+- [ ] Prepare 2-3 stories using STAR
+
+### 70.3 Questions to Ask the Interviewer 🔴
+- [ ] What does a typical first engagement look like for an Ace?
+- [ ] How do rotations work in the Ace Team?
+- [ ] What separates a good Ace from a great one in the first 6 months?
+- [ ] What's the most ambitious AI project a recent Ace has shipped?
+
+## 71. Live Coding Round 🔴
+
+### 71.1 Common Patterns
+- [ ] Array/String — reverse, palindrome, anagram, two-sum
+- [ ] HashMap — frequency count, first non-repeating character
+- [ ] Linked list — reverse, detect cycle, find middle
+- [ ] Tree — traversal, height, sum of nodes
+- [ ] Sliding window — longest substring without repeating chars
+- [ ] OOP design — parking lot, library, etc.
+
+### 71.2 Approach (Talk Aloud)
+- [ ] Restate the problem
+- [ ] Clarify edge cases
+- [ ] Discuss brute force first
+- [ ] Optimize
+- [ ] Write clean code
+- [ ] Discuss time/space complexity
+- [ ] Walk through with an example
+
+## 72. Project Walkthrough Mastery 🔴
+
+### 72.1 AcquirerX
+- [ ] 2-minute elevator pitch
+- [ ] Why microservices over monolith
+- [ ] Your 12 modules — what each does
+- [ ] Why Eureka, Gateway, OpenFeign
+- [ ] Resilience4J circuit breaker states
+- [ ] JWT auth flow
+- [ ] RBAC implementation
+- [ ] JPA N+1 problem and your solution
+- [ ] Pagination and dynamic JPQL filtering
+- [ ] PAN masking (PCI-DSS)
+- [ ] MDC request logging
+- [ ] How to add AI (memorize 3 use cases)
+- [ ] Biggest bug or challenge
+
+### 72.2 Care++
+- [ ] End-to-end architecture in 2 minutes
+- [ ] Why FAISS over other vector DBs
+- [ ] Chunking strategy with numbers
+- [ ] Embedding model choice
+- [ ] How ResNet50 + BioBERT + Llama-3 interact
+- [ ] Prompt template (show one)
+- [ ] Hallucination mitigation
+- [ ] Scaling to 10K users
+- [ ] PII handling for medical data
+
+### 72.3 Trios NLP Internship
+- [ ] Short summary
+- [ ] Extractive vs abstractive summarization
+- [ ] Why spaCy, what NER did
+
+### 72.4 ITC Internship
+- [ ] Short summary
+- [ ] LGTM stack (Loki, Grafana, Tempo, Mimir) — or Grafana + Prometheus + Loki in your case
+- [ ] What problem it solved
 
 ---
 
-# WHAT TO SKIP (BE RUTHLESS ABOUT TIME)
+## 📚 Recommended Learning Resources
 
-These are too deep / too niche for a fresher Ace Team interview:
+> [!tip] Resource Strategy
+> DeepLearning.AI shorts are free, ~1-2 hours each, and taught by framework creators. Best ROI for time-constrained prep.
 
-- ❌ Detailed transformer math (Q/K/V, multi-head attention computation)
+### Tier 1 — DeepLearning.AI Short Courses (FREE)
+- [ ] ChatGPT Prompt Engineering for Developers
+- [ ] LangChain for LLM Application Development
+- [ ] LangChain: Chat with Your Data (RAG)
+- [ ] Building and Evaluating Advanced RAG
+- [ ] Functions, Tools and Agents with LangChain
+- [ ] AI Agents in LangGraph
+- [ ] Multi AI Agent Systems with crewAI
+
+### Tier 2 — Udemy (Paid, Wait for Sale ₹399-500)
+- [ ] LangChain — Develop LLM Powered Applications with LangChain (Eden Marco)
+- [ ] LangChain Mastery: Build GenAI Apps with LangChain & Pinecone
+- [ ] Generative AI Architectures with LLM, Prompt, RAG, Vector DB
+- [ ] LangGraph — Develop LLM Powered AI Agents with LangGraph
+
+### Tier 3 — YouTube (FREE)
+- [ ] LangChain official channel — RAG and Agents playlists
+- [ ] Krish Naik — Generative AI playlist (Indian instructor, accessible)
+- [ ] Sam Witteveen — practical LangChain walkthroughs
+- [ ] AssemblyAI — voice agents, function calling, evals
+- [ ] Andrej Karpathy — "Let's build GPT" (optional, only if curious about internals)
+
+### For Java + Spring
+- [ ] Telusko, Java Brains, Amigoscode — YouTube channels for quick revision
+- [ ] Spring Boot official docs
+
+### For System Design
+- [ ] System Design Primer (GitHub)
+- [ ] ByteByteGo YouTube channel
+- [ ] Gaurav Sen YouTube channel
+
+---
+
+## 🚫 What to Skip
+
+> [!danger] Be Ruthless About Time
+
+- ❌ Detailed transformer math (Q/K/V, multi-head attention)
 - ❌ LoRA / QLoRA / PEFT internals beyond the name
 - ❌ ColBERT, late interaction details
 - ❌ Speculative decoding internals
@@ -589,15 +1945,20 @@ These are too deep / too niche for a fresher Ace Team interview:
 - ❌ Image generation deep-dive (DALL-E, Stable Diffusion architecture)
 - ❌ Semantic Kernel, Haystack details
 - ❌ Pre-training data curation
-
-Know they exist. Don't go deep.
+- ❌ Deep DP hard problems
+- ❌ Heavy Kubernetes admin
+- ❌ Multiple cloud providers in depth (master AWS only)
+- ❌ Angular (React is enough)
+- ❌ .NET (Java covers you)
+- ❌ Aptitude prep (already cleared)
 
 ---
 
-# FINAL INTERVIEW-DAY CHECKLIST
+## ✅ Final Interview-Day Checklist
 
 - [ ] Can draw the full RAG pipeline on a whiteboard from memory
 - [ ] Can explain Care++ end-to-end in 2 minutes
+- [ ] Can explain AcquirerX end-to-end in 2 minutes
 - [ ] Have a memorized answer for "how would you add AI to AcquirerX" with 3 concrete use cases
 - [ ] Can define cold: tokens, embeddings, context window, temperature, cosine similarity
 - [ ] Can list prompt techniques: zero-shot, few-shot, CoT, ReAct
@@ -611,37 +1972,70 @@ Know they exist. Don't go deep.
 - [ ] Know names: FAISS, Chroma, Pinecone, Weaviate, Qdrant, pgvector
 - [ ] One-line answer for: RAG vs fine-tuning vs prompting decision
 - [ ] One-line answer for: cosine vs dot product
-- [ ] At least 2 smart questions to ask the interviewer
+- [ ] One-line answer for: HashMap internals (Java)
+- [ ] One-line answer for: IoC and DI
+- [ ] One-line answer for: ACID properties
+- [ ] One-line answer for: REST principles
+- [ ] At least 3 smart questions to ask the interviewer
 - [ ] LLM Gateway as Spring Boot microservice — pitch ready
+- [ ] 60-second self-intro memorized
+- [ ] STAR stories: 2 success, 1 failure, 1 conflict
+- [ ] Resume polished and printed (3 copies if in-person)
+- [ ] GitHub pinned repos updated
+- [ ] LinkedIn matched to resume
+- [ ] Good sleep night before
+- [ ] Calm mindset — you have Care++ and AcquirerX, you're ahead of most candidates
 
 ---
 
-# COVERAGE SCORECARD
+## 📊 Coverage Scorecard
 
 | Area | Coverage | Notes |
 |---|---|---|
-| Breadth of topics | 10/10 | Nothing missing from JD |
-| RAG depth | 10/10 | Sections 11–20 cover everything |
-| Agent depth | 9/10 | Section 22 plus LangGraph |
-| Production/Ops | 9/10 | Sections 24–30 |
-| Security | 9/10 | Sections 10, 25, 32 |
-| Project-specific | 10/10 | Sections 39, 40 |
-| JD coding-assistant requirement | 10/10 | Section 41 |
+| Java + Spring | 10/10 | Your strongest area |
+| Python | 7/10 | Biggest gap; cover basics + AI tools |
+| React + Frontend | 8/10 | Solid via Care++ and curriculum |
+| DSA + CS Fundamentals | 9/10 | HackerRank cleared |
+| Database + SQL | 9/10 | AcquirerX coverage |
+| AI/LLM | 10/10 | Comprehensive |
+| System Design | 8/10 | Including AI-specific |
+| Cloud (AWS) | 8/10 | SAA-C03 study helps |
+| DevOps (Docker, Git) | 8/10 | Solid |
+| Behavioral | 9/10 | STAR + questions ready |
+| Project-Specific | 10/10 | Care++ + AcquirerX |
+| JD Match | 10/10 | All keywords addressed |
 
-**Verdict:** This list is over-provisioned. Stop expanding the syllabus. Start drilling aloud.
-
----
-
-# STUDY STRATEGY
-
-1. **Knowledge phase** — Go through each 🔴 section, ensure you can explain every bullet in your own words.
-2. **Articulation phase** — Pick 10 topics from Section 38 and explain each aloud in 60-90 seconds.
-3. **Project phase** — Rehearse Care++ (Section 39) and AcquirerX+AI (Section 40) walkthroughs until automatic.
-4. **Buffer phase** — Skim 🟡 sections, just enough to recognize and one-liner.
-5. **Final phase** — Final Interview-Day Checklist above.
-
-Knowing 100 topics shallowly is worse than knowing 30 topics deeply enough to explain unprompted. Articulation under pressure is what wins these rounds.
+> [!success] Verdict
+> This checklist is over-provisioned. Stop expanding the syllabus. **Start drilling aloud.**
 
 ---
 
-**End of checklist. Earn your place, Kailash.**
+## 🗓️ Study Strategy
+
+> [!abstract] 5-Phase Plan
+> Knowledge → Articulation → Project → Buffer → Final
+
+1. **Knowledge Phase** — Go through each 🔴 section. Ensure you can explain every bullet in your own words.
+2. **Articulation Phase** — Pick 10 topics from Section 66 (AI) and 70 (Behavioral). Explain each aloud in 60-90 seconds.
+3. **Project Phase** — Rehearse Care++ (Section 67) and AcquirerX+AI (Section 68) walkthroughs until automatic.
+4. **Buffer Phase** — Skim 🟡 sections, just enough to recognize and one-liner.
+5. **Final Phase** — Run through Final Interview-Day Checklist the night before.
+
+> [!quote] Core principle
+> Knowing 100 topics shallowly is worse than knowing 30 topics deeply enough to explain unprompted. **Articulation under pressure is what wins these rounds.**
+
+---
+
+## 🏆 You've Got This, Kailash
+
+> [!success] Reality Check
+> - Most freshers walking into this interview have one CRUD app and a Kaggle notebook.
+> - You have **AcquirerX** (production-grade microservices) + **Care++** (real RAG with LangChain, FAISS, BioBERT).
+> - You've already cleared aptitude and coding rounds — proving you're in the top filter.
+> - You know more than you think. The interview is about articulating that depth and connecting it to Ace Team's AI-native vision.
+
+**Walk in confident. Earn your place.**
+
+---
+
+*End of master checklist. Last updated: 2026-05-23*
