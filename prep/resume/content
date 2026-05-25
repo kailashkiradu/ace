@@ -1,0 +1,67 @@
+Computer Science graduate with hands-on experience in full-stack engineering and applied AI. Architected AcquirerX, a microservices based payment platform on Spring Boot, Spring Cloud, and React, during my Cognizant internship. Author on an IEEE published paper on Care++, a multimodal deep learning clinical decision support system using CNN, BioBERT, and LLM powered summarization. Earlier, I built a real-time log monitoring solution at ITC Limited across 5+ production servers. I am also a ServiceNow Certified System Administrator. Right now, I am focused on growing into AI-native engineering through RAG pipelines, LangChain, and prompt engineering.
+
+
+intro:
+Good morning / afternoon. I'm Kailash Narayan Kiradu, a Computer Science graduate from RMK Engineering College, Chennai.
+Over the last few months, I worked as a Java Full-Stack Engineer Intern at Cognizant, where I architected AcquirerX, a microservices-based merchant acquiring and POS switch platform. It spans about twelve domain microservices covering the full payment lifecycle, from merchant onboarding to settlement and dispute workflows. I built it using Spring Boot, Spring Cloud, and React, with patterns like JWT-based role access, Resilience4J circuit breakers, and Swagger documentation. That internship gave me real exposure to how enterprise systems are designed and shipped.
+Before Cognizant, I worked on my final-year project, Care++, an AI-driven clinical decision-support system. It brings together CNN-based medical image analysis, BioBERT for biomedical entity recognition, and LLM-powered clinical summarization, all running on a hybrid Python and Spring Boot microservices stack. The research from this project was published as an IEEE paper.
+Earlier, I interned at ITC Limited as a Software Development Intern, where I built a real-time log monitoring solution using Grafana, Prometheus, and Loki across five production servers. That was my first taste of how observability really matters in production systems.
+Right now, I'm extending my full-stack foundation into AI-native engineering. I'm actively building expertise in RAG pipelines, LangChain, vector retrieval, and prompt engineering, because I see that as the direction the industry is moving in, especially for enterprise applications.
+What draws me to the Cognizant Ace Team specifically is the chance to combine my full-stack engineering background with the AI-native work that the role focuses on. I'd love to walk you through any of these projects in more depth.
+
+
+Languages: Java, Python, JavaScript, SQL
+Backend: Spring Boot, Spring Cloud (Gateway, Eureka, OpenFeign), Spring Data JPA, Hibernate, REST APIs, Flask, FastAPI
+Frontend: React.js, HTML, CSS, Bootstrap
+AI / ML: LangChain, RAG pipelines, Prompt Engineering, Embeddings, FAISS, Ollama, Hugging Face Transformers, OpenAI API
+Databases: MySQL, PostgreSQL, SQL Server, NeonDB
+Cloud & DevOps: AWS, Docker, Git, GitHub, Maven, CI/CD
+Observability: Grafana, Prometheus, Loki, Postman, Swagger / OpenAPI
+
+
+
+Java Full-Stack Engineer Intern — Cognizant Technology Solutions, Chennai | Feb 2026 – May 2026
+
+Architected AcquirerX, a microservices-based Merchant Acquiring & POS Switch platform on Spring Boot 3.x, Spring Cloud (Gateway, Eureka, OpenFeign), and React — spanning 12 microservices and 27 JPA entities across the full payment lifecycle (onboarding, switching, settlement, reconciliation, disputes).
+Implemented production-grade patterns: JWT-based RBAC, Resilience4J circuit breakers, dynamic JPQL filtering with pagination, PAN masking, MDC logging, and exposed Swagger and Spring Actuator endpoints for observability.
+
+
+Software Development Intern — ITC Limited, Chennai | June 2025 – July 2025
+
+Built a real-time log monitoring solution integrating SQL Server with Grafana, Prometheus, and Loki across 5+ production servers; implemented role-based dashboards, plant-specific filters, and alert mechanisms for critical events, reducing manual log-inspection effort for the operations team.
+
+
+Care++ (Paper-Aligned)
+Care++ — AI-Driven Unified Health Record & Clinical Decision Support System (IEEE-Published Research) | Spring Boot, React.js, Flutter, Flask, PostgreSQL, PyTorch
+
+Built a multimodal deep-learning clinical decision-support system integrating CNN-based medical image analysis, BioBERT for drug-interaction prediction, and LLM-powered clinical summarization within a hybrid Python + Spring Boot microservices architecture; achieved 96.85% classification accuracy and published in IEEE RMKMATE 2026. DOI: 10.1109/RMKMATE69073.2026.11518930
+
+
+
+SkillPilot — AI-Driven Personalized Learning Platform | React.js, Gemini API, Clerk, Drizzle ORM, NeonDB, YouTube API
+
+Built a dynamic learning platform delivering personalized course pathways and curated video resources via the Gemini API and YouTube API; implemented authentication with Clerk, data modelling with Drizzle ORM over NeonDB (serverless Postgres), and a responsive React frontend. [GitHub Link]
+
+
+AcquirerX Compliance Assistant (Add After You Build)
+AcquirerX Compliance Assistant (Personal Build) | Python, FastAPI, LangChain, FAISS, sentence-transformers, Ollama
+
+Built a fully local RAG-powered assistant over PCI-DSS and RBI payment-compliance documents — implemented recursive chunking, embedding-based retrieval via FAISS, and Ollama-served LLM response generation; designed as an AI extension to the AcquirerX payments platform. [GitHub Link]
+
+
+
+Publications
+Care++: A Deep Learning-Driven Unified Patient Health Record and Intelligent Clinical Decision Support System
+IEEE RMKMATE 2026 · 3rd International Conference on Research Methodologies in Knowledge Management, AI, and Telecommunication Engineering, Chennai, India
+DOI: 10.1109/RMKMATE69073.2026.11518930
+
+
+First Place — 2024 Departmental Paper Presentation for a technical talk on neuromorphic ("Mini-Brain") computing architectures and their potential in low-power AI hardware.
+Second Runner-Up — Hackelite 2.0, PEC's 24-Hour Hackathon.
+Led organization of a non-technical event at RMK Engineering College, coordinating a team of 12 across planning, logistics, and execution for 150+ participants.
+Completed AWS Foundations & Architecture coursework on cloud services and scalable solution design.
+
+
+ServiceNow Certified System Administrator (CSA) — Verify
+GitHub Foundations Certified — Verify
+
