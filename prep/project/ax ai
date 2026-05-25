@@ -1,0 +1,884 @@
+---
+title: AcquirerX Compliance Assistant Deep Dive
+tags: [interview, cognizant, ace-team, project-prep, rag, langchain, faiss, ollama, fastapi]
+created: 2026-05-25
+owner: Kailash
+status: to-be-built
+priority: critical-must-build
+---
+
+# 🤖 AcquirerX Compliance Assistant — Complete Project Deep Dive
+
+> **CRITICAL:** You must actually build this before adding to resume. Once on resume, interviewer will probe deeply. This file makes sure you understand every layer.
+
+---
+
+## 📋 Quick Reference
+
+| Field | Value |
+|---|---|
+| **Full name** | AcquirerX Compliance Assistant |
+| **Type** | Personal portfolio project |
+| **Purpose** | RAG-powered Q&A over payment compliance documents |
+| **Domain ties to** | AcquirerX (extends it with AI capability) |
+| **Documents indexed** | PCI-DSS, RBI guidelines (2-3 PDFs) |
+| **Tech** | Python, FastAPI, LangChain, FAISS, sentence-transformers, Ollama |
+| **Built locally** | Yes — fully offline, no cloud APIs |
+
+---
+
+## 🎯 PART 1 — What This Project Does
+
+### The Problem It Solves
+
+Payment compliance documents are:
+- **Long** (PCI-DSS v4.0 alone is ~370 pages)
+- **Dense and technical** (legal + technical language)
+- **Frequently referenced** by engineers, compliance officers, support staff
+- **Hard to search** with traditional keyword search
+
+When you're building AcquirerX and need to answer "What are PCI-DSS requirements for storing PAN data?", you typically have to:
+1. Find the right PDF
+2. Search through hundreds of pages
+3. Read relevant sections
+4. Synthesize the answer yourself
+
+### The Solution
+
+A **RAG-powered assistant** that:
+1. Ingests compliance PDFs
+2. Chunks and embeds them into a searchable vector store
+3. Accepts natural language questions
+4. Retrieves the most relevant chunks
+5. Feeds them to a local LLM (Ollama) that generates a grounded answer
+6. Returns the answer with citations
+
+### Why "AcquirerX" in the Name
+
+This project is **framed as an AI extension to AcquirerX**. It connects your two strongest projects:
+- AcquirerX = production-grade Java microservices
+- AcquirerX Compliance Assistant = AI capability bolted on top
+
+This makes your story coherent — you didn't just build random AI demo; you extended a real payments platform with AI.
+
+---
+
+## 🏗️ PART 2 — Architecture (Memorize This)
+
+### High-Level Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                      USER                               │
+│              (Browser / curl / API client)              │
+└─────────────────────────┬───────────────────────────────┘
+                          │ POST /ask
+                          │ {"question": "What is PCI-DSS Req 3?"}
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                    FASTAPI APP                          │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │ Route: /ask                                     │   │
+│  │ Validates input → calls RAG chain               │   │
+│  └─────────────────────────────────────────────────┘   │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│              LANGCHAIN RAG PIPELINE                     │
+│                                                         │
+│   1. Embed question                                     │
+│        ↓                                                │
+│   2. Retrieve top-k chunks from FAISS                   │
+│        ↓                                                │
+│   3. Build prompt with context + question               │
+│        ↓                                                │
+│   4. Send to Ollama LLM                                 │
+│        ↓                                                │
+│   5. Parse and return response                          │
+└──────────┬──────────────────────────────┬───────────────┘
+           │                              │
+           ▼                              ▼
+┌──────────────────┐            ┌──────────────────┐
+│   FAISS INDEX    │            │   OLLAMA SERVER  │
+│  (Vector Store)  │            │  (Local LLM)     │
+│                  │            │  llama3.2:3b     │
+│  Stores chunked  │            │  Runs on your    │
+│  + embedded      │            │  laptop, no API  │
+│  PDFs            │            └──────────────────┘
+└──────────────────┘
+           ▲
+           │ (built once via ingestion script)
+           │
+┌──────────┴───────────────────────────────────────────────┐
+│              INGESTION PIPELINE (offline)                │
+│                                                          │
+│  PDFs (PCI-DSS, RBI) → PyPDF → Recursive Chunker       │
+│        ↓                                                 │
+│  Embed each chunk with sentence-transformers            │
+│        ↓                                                 │
+│  Store vectors + metadata in FAISS index                │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Two Phases
+
+**Phase 1: Indexing (offline, runs once)**
+- Load PDFs
+- Split into chunks
+- Embed each chunk
+- Store in FAISS
+
+**Phase 2: Query (online, runs per request)**
+- Embed user question
+- Retrieve top-k similar chunks
+- Build prompt with context
+- LLM generates answer
+- Return to user
+
+---
+
+## 🧠 PART 3 — Tech Stack Deep Dive
+
+### 3.1 RAG (Retrieval-Augmented Generation) — The Core Concept
+
+> [!info] What RAG is
+> A pattern where an LLM is given relevant external knowledge at query time to generate grounded answers. Instead of relying on what the LLM "knows," it retrieves facts from your documents and answers based on them.
+
+**Why RAG matters:**
+- LLMs have knowledge cutoffs and limited internal knowledge
+- LLMs hallucinate when they don't know
+- You can't easily teach an LLM private data (PCI-DSS, internal docs)
+- RAG injects fresh, specific context per question
+
+**RAG vs Fine-Tuning:**
+
+| Aspect | RAG | Fine-Tuning |
+|---|---|---|
+| Cost | Low | High |
+| Speed to update | Instant (re-index) | Slow (retrain) |
+| Hallucination | Low (grounded) | Still possible |
+| Best for | Q&A over documents | Style/behavior adaptation |
+
+**RAG Pipeline (memorize):**
+1. **Ingest** — load documents
+2. **Chunk** — split into pieces
+3. **Embed** — convert to vectors
+4. **Store** — index in vector DB
+5. **Query** — embed user question
+6. **Retrieve** — find similar chunks
+7. **Augment** — add chunks to prompt
+8. **Generate** — LLM produces answer
+
+**Interview prep:**
+- *"What is RAG?"* → Retrieval-Augmented Generation. LLM is given relevant context at query time, generates answers grounded in that context
+- *"When would you use RAG over fine-tuning?"* → When data changes often, when you need source attribution, when you can't afford training compute
+- *"Why not just stuff all documents in the prompt?"* → Context windows are limited (typically 8K-128K tokens), cost scales with input size, attention degrades on long contexts
+
+---
+
+### 3.2 LangChain (Orchestration Framework)
+
+> [!info] What it is
+> LangChain is a Python framework for building LLM applications. Provides components (chains, prompts, retrievers, agents) and integrations (vector stores, LLMs).
+
+**Why LangChain for this project:**
+- Abstracts away boilerplate (embedding, retrieval, prompt building)
+- Integrates with FAISS, Ollama, sentence-transformers out of the box
+- Modular — swap components easily (change embeddings model, vector store, LLM)
+- Production patterns (chains, memory, agents)
+
+**LangChain Concepts You'll Use:**
+
+**Document Loaders** — read PDFs, text files, web pages
+```python
+from langchain.document_loaders import PyPDFLoader
+loader = PyPDFLoader("pci-dss.pdf")
+docs = loader.load()
+```
+
+**Text Splitters** — chunk documents
+```python
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+chunks = splitter.split_documents(docs)
+```
+
+**Embeddings** — vectorize text
+```python
+from langchain_community.embeddings import HuggingFaceEmbeddings
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+```
+
+**Vector Stores** — index and search
+```python
+from langchain_community.vectorstores import FAISS
+vectorstore = FAISS.from_documents(chunks, embeddings)
+```
+
+**Retrievers** — fetch relevant chunks
+```python
+retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+```
+
+**Chains (LCEL)** — pipe components together
+```python
+chain = retriever | prompt | llm | output_parser
+```
+
+**Interview prep:**
+- *"Why LangChain?"* → Provides building blocks for RAG — loaders, splitters, embeddings, vector stores, LLM wrappers — that work together without custom glue code
+- *"LangChain vs LlamaIndex?"* → LangChain is general-purpose LLM orchestration. LlamaIndex is RAG-focused with more advanced retrieval. Both are popular
+- *"What is LCEL?"* → LangChain Expression Language. Pipe-syntax for composing chains: `prompt | llm | parser`
+
+---
+
+### 3.3 FAISS (Vector Store)
+
+> [!info] What FAISS is
+> Facebook AI Similarity Search. A library for efficient similarity search and clustering of dense vectors. Created by Meta, open-source, fast, runs in-memory.
+
+**Why FAISS for this project:**
+- Free and open-source (no API costs)
+- Runs locally (privacy, no network calls)
+- Very fast for similarity search
+- Easy to use with Python and LangChain
+- Sufficient for small/medium document corpora
+
+**How FAISS works:**
+- Stores high-dimensional vectors (e.g., 384-dimensional)
+- Builds an index for efficient nearest-neighbor search
+- Approximate Nearest Neighbor (ANN) algorithms for speed
+- Returns top-k most similar vectors to a query vector
+
+**FAISS Index Types:**
+- **IndexFlat** — exact search, slow for large datasets
+- **IndexIVF** — Inverted File Index, much faster
+- **IndexHNSW** — Hierarchical Navigable Small Worlds, very fast, more memory
+
+For your scale (few PDFs), `IndexFlat` is fine — exact and simple.
+
+**Similarity Metrics:**
+- **Cosine similarity** — angle between vectors (most common for text)
+- **Dot product** — for normalized vectors, equivalent to cosine
+- **L2 distance** — Euclidean distance
+
+**Interview prep:**
+- *"Why FAISS?"* → Free, local, fast for small/medium scale, integrates with LangChain
+- *"FAISS vs Pinecone vs Chroma?"* → FAISS is local + library (you manage persistence). Pinecone is managed cloud. Chroma is local with persistence built-in. Choice depends on scale and ops needs
+- *"How does FAISS find similar vectors?"* → For your IndexFlat case, it computes similarity between query and every vector, returns top-k. For HNSW, it traverses a small-world graph for fast approximate search
+- *"What's the dimensionality of your vectors?"* → 384 (using all-MiniLM-L6-v2)
+
+---
+
+### 3.4 sentence-transformers (Embedding Model)
+
+> [!info] What it is
+> A Python library for state-of-the-art sentence and text embeddings. Built on top of Hugging Face Transformers. Provides pretrained models that produce dense vector representations of text.
+
+**Model you'll use: `all-MiniLM-L6-v2`**
+
+| Property | Value |
+|---|---|
+| **Dimensions** | 384 |
+| **Speed** | Very fast (millions of sentences per second on GPU, ~14K on CPU) |
+| **Size** | ~80 MB |
+| **Performance** | Strong on semantic similarity benchmarks |
+| **Best for** | General-purpose semantic search |
+
+**Why this model:**
+- **Free** — runs locally, no API costs
+- **Fast** — small enough to embed thousands of chunks quickly on CPU
+- **Good quality** — competitive with larger models for retrieval
+- **Compact** — 384 dimensions vs 1536 for OpenAI ada-002
+
+**How it works:**
+- Takes text input (sentence or paragraph)
+- Tokenizes
+- Passes through a transformer encoder (MiniLM)
+- Pools outputs (mean pooling) into a 384-dim vector
+- This vector captures semantic meaning
+
+**Interview prep:**
+- *"What is an embedding?"* → A dense vector representation of text where semantically similar texts have close vectors. Enables similarity search by comparing vectors
+- *"Why all-MiniLM-L6-v2?"* → Small (80MB), fast on CPU, free, 384-dim vectors are efficient, performs well on retrieval tasks
+- *"What's the alternative for higher quality?"* → bge-base or bge-large from BAAI — larger models with better performance but slower
+
+---
+
+### 3.5 Ollama (Local LLM Serving)
+
+> [!info] What Ollama is
+> A tool for running open-source LLMs locally on your laptop. Downloads model weights, exposes a REST API. Supports Llama, Mistral, Gemma, Phi, and many others.
+
+**Why Ollama for this project:**
+- **Free** — no API costs
+- **Private** — data never leaves your laptop (great for compliance docs!)
+- **Offline** — works without internet
+- **Simple** — single command to run any model
+- **No rate limits**
+
+**Model you'll use: `llama3.2:3b`**
+
+| Property | Value |
+|---|---|
+| **Parameters** | 3 billion |
+| **Size on disk** | ~2 GB |
+| **RAM needed** | ~4-6 GB |
+| **Speed (CPU)** | Reasonable for short responses |
+| **Quality** | Decent for Q&A tasks |
+
+**How Ollama works:**
+1. Install Ollama (one binary)
+2. Run `ollama pull llama3.2:3b` — downloads model
+3. Run `ollama serve` — starts server on http://localhost:11434
+4. Your app calls the API: `POST /api/generate` with prompt
+5. Ollama runs inference, streams response
+
+**Integration with LangChain:**
+```python
+from langchain_ollama import ChatOllama
+llm = ChatOllama(model="llama3.2:3b", temperature=0)
+```
+
+**Interview prep:**
+- *"Why Ollama instead of OpenAI?"* → Compliance docs are sensitive — can't send to external APIs. Ollama runs locally. Plus it's free and works offline
+- *"Why llama3.2:3b specifically?"* → Small enough to run on laptop CPU/RAM, good enough quality for Q&A. Larger models (7B, 13B, 70B) give better quality but need more RAM/GPU
+- *"Why temperature=0?"* → Deterministic, factual responses. For compliance questions, you want consistent answers, not creative ones
+
+---
+
+### 3.6 FastAPI (Web Framework)
+
+> [!info] What FastAPI is
+> A modern, fast Python web framework for building APIs. Built on Starlette (async ASGI) and Pydantic (data validation). Auto-generates OpenAPI/Swagger docs.
+
+**Why FastAPI for this project:**
+- **Fast** — comparable to Node.js, Go (one of the fastest Python frameworks)
+- **Async support** — handles concurrent requests well
+- **Auto-validation** — Pydantic models validate input/output
+- **Auto-docs** — Swagger UI at `/docs` for free
+- **Type hints** — better developer experience
+
+**FastAPI vs Flask:**
+
+| Aspect | FastAPI | Flask |
+|---|---|---|
+| Speed | Faster (async) | Slower (sync by default) |
+| Validation | Built-in (Pydantic) | Manual |
+| API docs | Auto-generated | Manual (with extensions) |
+| Type safety | Strong (type hints) | Weaker |
+| Maturity | Newer (2018+) | Older (2010+) |
+| Learning curve | Slightly steeper | Easier for beginners |
+
+**Key FastAPI concepts:**
+- **Path operations** — endpoint functions decorated with `@app.get`, `@app.post`
+- **Pydantic models** — for request/response validation
+- **Dependency injection** — for shared logic (auth, DB sessions)
+- **Lifespan events** — startup/shutdown handlers
+- **CORS middleware** — for browser clients
+
+**Interview prep:**
+- *"Why FastAPI over Flask?"* → Async support, automatic validation via Pydantic, automatic OpenAPI docs, type-safe — better fit for a modern API
+- *"What is async in FastAPI?"* → Allows non-blocking I/O. While one request waits for the LLM, FastAPI can serve other requests on the same thread. Critical for high-concurrency scenarios
+
+---
+
+### 3.7 PyPDF / PDF Parsing
+
+**Why needed:**
+- Compliance docs are PDFs
+- Need to extract text for chunking
+
+**Tools:**
+- **PyPDF (formerly PyPDF2)** — pure Python, simple
+- **pdfplumber** — better at tables and complex layouts
+- **Unstructured** — more sophisticated, handles multiple formats
+
+**Challenges:**
+- PDFs are visual, not semantic — text extraction can be messy
+- Tables, multi-column layouts can break naively
+- Some PDFs are scanned images — need OCR (Tesseract)
+
+**Interview prep:**
+- *"How did you handle PDF parsing?"* → Used PyPDF for text extraction with metadata (page numbers). For complex layouts, pdfplumber would be a better choice
+- *"What about scanned PDFs?"* → Would need OCR (Tesseract) to extract text from images first. Out of scope for this project
+
+---
+
+### 3.8 Recursive Character Text Splitter (Chunking Strategy)
+
+> [!info] What it is
+> A LangChain text splitter that tries to keep semantically related text together. Splits on natural boundaries (paragraphs → sentences → words → characters) hierarchically.
+
+**Your chunking strategy:**
+- **chunk_size = 1000** characters
+- **chunk_overlap = 200** characters (20%)
+
+**Why these values:**
+- 1000 chars ≈ 250 words ≈ 1 paragraph — captures meaningful units
+- 200 chars overlap prevents losing context at boundaries
+- Standard defaults that work for most documents
+
+**Splitting hierarchy:**
+1. First try splitting on `\n\n` (paragraphs)
+2. If chunks still too big, split on `\n` (lines)
+3. Then on `. ` (sentences)
+4. Finally on ` ` (words)
+5. Last resort: character-level
+
+**Why hierarchical:**
+- Preserves semantic boundaries
+- A chunk is usually a coherent paragraph rather than a random window
+- Better retrieval quality
+
+**Interview prep:**
+- *"Why chunk size 1000?"* → Captures roughly one paragraph or one coherent section. Smaller (200-500) is good for precise retrieval; larger (2000+) is good for context-heavy questions. 1000 is a good default
+- *"Why 200 char overlap?"* → Prevents losing context at chunk boundaries. If a key sentence is split across two chunks, overlap ensures one of them has the full sentence
+- *"Alternatives to character-based chunking?"* → Token-based (using tokenizer), semantic chunking (split where embedding similarity drops), document-aware (split on headers, sections). All have tradeoffs
+
+---
+
+### 3.9 Top-k Retrieval
+
+> [!info] What it is
+> When a question is asked, retrieve the `k` most similar chunks from the vector store. These are passed to the LLM as context.
+
+**Your value: k=4**
+
+**Why this value:**
+- 4 chunks × 1000 chars = ~4000 chars of context
+- Fits comfortably in 8K context window with room for question + prompt
+- Enough to cover the question without overwhelming the LLM
+- More chunks → more noise; fewer → may miss relevant info
+
+**Tradeoffs:**
+- **Higher k (8-10):** more comprehensive but slower, more noise, may dilute the answer
+- **Lower k (2-3):** faster, more focused, but may miss relevant info
+
+**Interview prep:**
+- *"Why k=4?"* → Balance between context coverage and prompt size. With 1000-char chunks, k=4 gives ~4000 chars context, fits LLM context window comfortably
+- *"What if k=4 doesn't return relevant chunks?"* → Add reranking (e.g., cross-encoder reranker), increase k and rerank, or add hybrid search (BM25 + vector)
+
+---
+
+### 3.10 Prompt Engineering
+
+**Your prompt template:**
+```
+You are a payments-compliance assistant. Answer the user's question using ONLY the context provided below. If the answer is not in the context, say "I don't have enough information in the provided documents to answer this." Do not make up information.
+
+Context:
+{context}
+
+Question:
+{question}
+
+Answer:
+```
+
+**Why this prompt works:**
+- **Role definition** — "compliance assistant" sets context
+- **Constraint** — "ONLY the context" prevents hallucination
+- **Fallback** — explicit "I don't have enough info" instruction
+- **Negative constraint** — "Do not make up information"
+- **Clear sections** — Context, Question, Answer
+
+**Interview prep:**
+- *"How did you prevent hallucinations?"* → Explicit prompt instruction to only use context, with an explicit "I don't know" fallback. Temperature set to 0. Structured prompt format with clear sections
+- *"What other techniques exist?"* → Few-shot examples (show desired format), chain-of-thought (think step-by-step), JSON mode (force structured output), guardrails libraries
+
+---
+
+### 3.11 Structured JSON Output
+
+Your `/ask` endpoint returns:
+```json
+{
+  "answer": "PCI-DSS Req 3.5 requires...",
+  "sources": [
+    "pci-dss-v4.pdf, page 47",
+    "pci-dss-v4.pdf, page 48"
+  ]
+}
+```
+
+**Why structured output:**
+- Easier for frontends to consume
+- Citation/traceability — users can verify
+- Programmatic processing
+
+---
+
+## 🎓 PART 4 — Key Concepts to Master
+
+### 4.1 Vector Embeddings — Deeper Understanding
+
+Embeddings are **dense vector representations** of text.
+
+**Key properties:**
+- Each text → fixed-size vector (e.g., 384 floats)
+- Similar text → similar vectors (close in vector space)
+- Dimensionality is a model property (384 for MiniLM, 1536 for OpenAI ada)
+
+**How to think about it:**
+- Imagine a high-dimensional space (e.g., 384 dimensions)
+- Each text is a point in this space
+- Semantically similar texts cluster together
+- "Cardholder data" and "PAN" are close
+- "Cardholder data" and "ice cream" are far apart
+
+**How embeddings are trained:**
+- Trained on pairs of similar/dissimilar texts (contrastive learning)
+- Models learn to map text to vectors such that similarity = closeness
+- Pretrained models like MiniLM work well out of the box
+
+### 4.2 Cosine Similarity vs Dot Product
+
+**Cosine similarity:**
+- Measures the angle between two vectors
+- Range: -1 (opposite) to 1 (identical)
+- Insensitive to vector magnitude
+- Formula: `cos(θ) = (A · B) / (||A|| × ||B||)`
+
+**Dot product:**
+- Computes element-wise multiplication and sum
+- Sensitive to magnitude
+- Faster than cosine (no normalization needed)
+- For **normalized vectors**, dot product = cosine similarity
+
+**Which to use:**
+- sentence-transformers produces normalized vectors → both work
+- FAISS uses inner product (dot product) by default for normalized vectors
+
+### 4.3 Approximate Nearest Neighbors (ANN)
+
+For very large vector stores, exact search is slow. ANN algorithms trade a tiny bit of accuracy for huge speed gains.
+
+**Popular ANN algorithms:**
+- **HNSW (Hierarchical Navigable Small Worlds)** — graph-based, very fast, used by FAISS, Qdrant, Weaviate
+- **IVF (Inverted File)** — clusters vectors first, searches only relevant clusters
+- **LSH (Locality-Sensitive Hashing)** — hashes similar vectors to same buckets
+- **PQ (Product Quantization)** — compresses vectors for speed
+
+For your project scale, exact search (IndexFlat) is fine.
+
+### 4.4 Context Window
+
+**Definition:** The maximum number of tokens an LLM can process in a single call (prompt + completion).
+
+**Examples:**
+- llama3.2:3b — 8,192 tokens
+- GPT-4 — 128K tokens
+- Claude 3 — 200K tokens
+
+**Why it matters:**
+- Limits how many chunks you can stuff
+- Determines max chunk size × k
+- Quality often degrades with longer contexts (lost-in-the-middle)
+
+**Tokens vs words:**
+- 1 token ≈ 4 characters ≈ 0.75 words
+- 1000 chars ≈ 250 tokens
+
+### 4.5 Hallucinations
+
+**Definition:** When an LLM produces information that's factually wrong, fabricated, or unsupported by context.
+
+**Why LLMs hallucinate:**
+- Trained to produce plausible-sounding text
+- No internal fact-checking
+- Confident even when wrong
+
+**Mitigation strategies:**
+1. **RAG** — ground in retrieved context
+2. **Low temperature** — deterministic outputs
+3. **Explicit prompting** — "only use context", "say I don't know"
+4. **Citations** — force model to cite sources
+5. **Structured output** — limit what model can say
+6. **Reranking** — better retrieval quality
+7. **Human review** — for high-stakes outputs
+
+### 4.6 Temperature
+
+**Definition:** Controls randomness in LLM outputs.
+
+- **0** — deterministic, picks highest-probability token
+- **0.5** — balanced
+- **1.0** — creative, more variation
+- **2.0** — very random, sometimes incoherent
+
+**For RAG:** use 0 or near-0 for factual, consistent outputs.
+
+### 4.7 Indexing vs Querying
+
+**Indexing (offline):**
+- Done once when documents change
+- Slow, batch process
+- Outputs: FAISS index file on disk
+
+**Querying (online):**
+- Done every user request
+- Must be fast (<1 second ideally)
+- Loads pre-built FAISS index in memory
+
+### 4.8 Prompt Caching
+
+**Concept:** Cache the LLM's response to similar prompts so you don't re-run for repeated questions.
+
+**Levels:**
+- **Exact match cache** — same prompt → return cached answer
+- **Semantic cache** — similar prompts (by embedding) → return cached answer
+
+Not implemented in your project but good to mention if asked about optimization.
+
+### 4.9 RAGAS (RAG Evaluation)
+
+**What it is:** A framework for evaluating RAG systems.
+
+**Key metrics:**
+- **Faithfulness** — does the answer match the retrieved context?
+- **Answer Relevance** — does the answer address the question?
+- **Context Precision** — were the retrieved chunks relevant?
+- **Context Recall** — did retrieval get all needed info?
+
+You haven't implemented this, but **mention as future work** in interviews.
+
+---
+
+## 🎤 PART 5 — Common Interview Questions
+
+### Q1: Walk me through your AcquirerX Compliance Assistant end-to-end
+
+> AcquirerX Compliance Assistant is a personal project I built to demonstrate hands-on RAG skills. It's a local, fully offline RAG-powered assistant that answers questions about payment compliance documents — PCI-DSS and RBI guidelines.
+>
+> The architecture has two phases. In the indexing phase, I load PDFs with PyPDF, chunk them using LangChain's RecursiveCharacterTextSplitter with chunk size 1000 and overlap 200, embed each chunk with the all-MiniLM-L6-v2 model from sentence-transformers, and store the resulting 384-dimensional vectors in a FAISS index.
+>
+> At query time, the FastAPI app receives a question, the question is embedded with the same model, FAISS retrieves the top 4 most similar chunks, those chunks are stuffed into a prompt template with explicit instructions to only use the provided context, and the prompt is sent to a local LLM running on Ollama — llama3.2:3b. The response is parsed and returned as JSON with the answer and source citations.
+>
+> Everything runs locally — no API calls, no cloud, no data leakage. That's deliberate because compliance documents are sensitive.
+
+### Q2: What is RAG and why did you use it?
+
+> RAG stands for Retrieval-Augmented Generation. The idea is to give an LLM relevant context at query time so it generates grounded answers instead of hallucinating from its training data.
+>
+> For compliance Q&A, RAG is the right choice because the documents are private (not in the LLM's training data), they change occasionally (would need re-fine-tuning), and accuracy matters (you can't make up regulations). RAG also gives you traceable citations — you can tell the user which page of which document the answer came from.
+
+### Q3: Walk me through your chunking strategy
+
+> I used LangChain's RecursiveCharacterTextSplitter with chunk_size=1000 characters and chunk_overlap=200. The recursive part is important — it tries to split on natural boundaries hierarchically: first paragraphs, then sentences, then words, then characters as a last resort. This preserves semantic coherence within chunks.
+>
+> 1000 chars roughly captures one paragraph or one coherent section. 200 chars of overlap prevents losing context at chunk boundaries — if a key sentence falls right where chunks split, the overlap ensures one chunk has the full sentence. These are well-tested defaults that work for most documents.
+
+### Q4: Why FAISS over Pinecone or Chroma?
+
+> Three reasons. First, it's free and runs locally — no API costs, no network calls, no external dependencies. Second, it's fast — FAISS is the gold standard for similarity search, used by Meta in production. Third, my corpus is small (2-3 PDFs, maybe a few thousand chunks), so I don't need the persistence or scaling features of Pinecone or Chroma. For a production system at scale, I'd probably switch to Qdrant or Pinecone for managed scaling, but FAISS is perfect for this use case.
+
+### Q5: Which embedding model and why?
+
+> all-MiniLM-L6-v2 from sentence-transformers. 384 dimensions, 80 MB on disk, runs fast on CPU, produces strong embeddings for general semantic search. It's a great balance of speed, size, and quality. For higher quality, I'd use bge-base or bge-large, but those are slower. For commercial scale, OpenAI's text-embedding-3 produces 1536-dimensional vectors with even better quality, but it's a paid API and sends data externally — not great for compliance docs.
+
+### Q6: Why local LLM (Ollama) instead of OpenAI?
+
+> Compliance documents can be sensitive. Sending them to OpenAI means data leaves my machine and goes to a third party — not great for trust or for actual production deployment in regulated industries. Ollama runs the LLM entirely locally on my laptop. No data leaves the machine. No API costs. No rate limits. Works offline. The tradeoff is quality — a 3B parameter local model isn't as good as GPT-4, but it's good enough for grounded Q&A where the context does most of the heavy lifting.
+
+### Q7: How do you prevent hallucinations?
+
+> Multiple layers. First, RAG itself — by providing context, the model has facts to ground in. Second, my prompt template explicitly instructs the model to "use ONLY the provided context" and "say I don't have enough information" if the context doesn't contain the answer. Third, temperature is set to 0 for deterministic outputs. Fourth, structured JSON response means the model can't just freeform. For a production system, I'd add automated evaluation with RAGAS to measure faithfulness and answer relevance, plus human-in-the-loop review for critical answers.
+
+### Q8: What's the difference between RAG and fine-tuning?
+
+> RAG adds external knowledge at query time. Fine-tuning bakes knowledge into model weights through training. Different tools for different problems.
+>
+> RAG is right when your data changes often, when you need source citations, when training compute is expensive, or when documents are private (PCI-DSS, internal docs).
+>
+> Fine-tuning is right when you need to change model behavior or style, when the knowledge is stable, when you can afford training, and when retrieval latency is unacceptable.
+>
+> For a compliance assistant, RAG is clearly the right choice — docs update, citations matter, no training data needed.
+
+### Q9: What's a context window and how did you handle it?
+
+> Context window is the maximum number of tokens an LLM can process in one call. For llama3.2:3b, it's 8192 tokens. I have to fit prompt + retrieved context + space for the answer.
+>
+> My retrieved context is 4 chunks × 1000 chars ≈ 4000 chars ≈ 1000 tokens. Prompt template is another ~200 tokens. Question is ~50 tokens. That leaves around 7000 tokens for the answer, which is way more than I need. So my design fits comfortably within the context window.
+
+### Q10: How would you scale this to handle 10,000 documents?
+
+> A few changes. First, I'd switch FAISS to use HNSW indexing instead of flat — much faster for large corpora. Or move to a managed vector DB like Qdrant or Pinecone for built-in persistence, replication, and metadata filtering. Second, add async processing for ingestion — embedding 10K documents takes time, parallelize it. Third, add reranking — after retrieving top 20 chunks with vector search, rerank with a cross-encoder for higher quality top-k. Fourth, add hybrid search — combine BM25 keyword search with vector search for better recall. Fifth, scale the LLM — switch to a larger model on a GPU server, or route to OpenAI for higher quality (if compliance allows). Sixth, add caching — semantic cache for repeated questions. Finally, add evaluation pipeline with RAGAS to track quality over time.
+
+### Q11: Why FastAPI over Flask?
+
+> FastAPI is faster (async support out of the box), it auto-generates OpenAPI/Swagger docs which is great for API exploration, and it uses Pydantic for request/response validation — so you get type safety and automatic input validation. Plus its modern async model handles concurrent requests better, which matters when LLM calls take a few seconds. Flask works fine, but FastAPI is just better for modern API development.
+
+### Q12: What evaluation did you do?
+
+> Honest answer — I didn't run formal evaluation metrics on this project. I manually tested with a set of compliance questions and reviewed the answers against the source PDFs. In a more rigorous setup, I'd use RAGAS to measure faithfulness (does the answer match retrieved context?), answer relevance (does it address the question?), context precision and recall. I'd also build a golden test set of questions with known correct answers for regression testing.
+
+### Q13: How would you integrate this into AcquirerX?
+
+> Two patterns. First, **service-to-service integration** — wrap the FastAPI as a microservice in the AcquirerX architecture. Spring Boot services call it for compliance lookups. Add Resilience4J circuit breakers and retries around the calls. Use the existing JWT auth flow. Second, **embedded chatbot** — expose it as a chat interface in the AcquirerX admin UI so operations and compliance teams can query compliance docs directly. Either way, MDC trace IDs would propagate so we can debug across the existing distributed tracing setup.
+
+---
+
+## ⚖️ PART 6 — Tradeoffs and Alternatives
+
+### 6.1 RAG vs Fine-Tuning
+
+| Choice | This Project | Why |
+|---|---|---|
+| RAG | ✅ Used | Docs change, need citations, no training compute |
+| Fine-tuning | ❌ | Slow to update, requires GPU, no citations |
+
+### 6.2 FAISS vs Pinecone vs Chroma vs Qdrant
+
+| Choice | This Project | Why |
+|---|---|---|
+| FAISS | ✅ Used | Free, local, fast for small scale |
+| Chroma | ❌ | Better for persistence at scale, not needed here |
+| Pinecone | ❌ | Managed cloud, not local |
+| Qdrant | ❌ | Self-hosted, more features, overkill |
+
+### 6.3 Ollama vs OpenAI vs Anthropic
+
+| Choice | This Project | Why |
+|---|---|---|
+| Ollama (local) | ✅ Used | Privacy, free, offline |
+| OpenAI API | ❌ | Better quality but external, paid |
+| Anthropic Claude | ❌ | Same as OpenAI |
+
+### 6.4 FastAPI vs Flask vs Django
+
+| Choice | This Project | Why |
+|---|---|---|
+| FastAPI | ✅ Used | Async, fast, modern, type-safe |
+| Flask | ❌ | Slower, manual validation |
+| Django | ❌ | Too heavyweight for API-only service |
+
+### 6.5 all-MiniLM-L6-v2 vs bge-large vs OpenAI ada
+
+| Choice | This Project | Why |
+|---|---|---|
+| all-MiniLM-L6-v2 | ✅ Used | Free, fast on CPU, good quality |
+| bge-large | ❌ | Better quality but slower |
+| OpenAI ada-002 | ❌ | Paid, external, privacy concerns |
+
+---
+
+## 📈 PART 7 — Scaling and Production Considerations
+
+### Indexing at Scale
+- Parallelize embedding (multiprocessing)
+- Batch upserts to vector DB
+- Incremental indexing (only re-index changed docs)
+
+### Retrieval Quality
+- Hybrid search (BM25 + vector)
+- Cross-encoder reranking
+- Query expansion (rewrite query for better recall)
+
+### LLM Layer
+- Move to GPU-served larger model (Llama 3.1 70B)
+- Or hybrid: small local model for simple queries, larger remote for complex
+- Add streaming responses (better UX)
+- Implement prompt caching
+
+### Observability
+- Log every request: question, retrieved chunks, answer, latency
+- Track metrics: avg latency, retrieval quality, user satisfaction
+- Sample outputs for manual quality review
+
+### Production Deployment
+- Containerize with Docker
+- Deploy on GPU instance for LLM
+- Vector DB as managed service (Pinecone/Qdrant Cloud)
+- Load balancer in front
+- Rate limiting per user
+
+---
+
+## 🚨 PART 8 — Red Flags (DO NOT Say These)
+
+### ❌ Don't Say:
+1. *"I built this in production at a fintech"* → It's a personal project
+2. *"I designed novel RAG techniques"* → Standard patterns, well-documented
+3. *"I evaluated this with RAGAS"* → You haven't (yet) — be honest
+4. *"This handles millions of queries"* → Local laptop project
+5. *"I trained the embedding model"* → You used a pretrained model
+
+### ✅ Do Say:
+1. *"Personal project to demonstrate RAG fundamentals"*
+2. *"Used standard patterns — LangChain, FAISS, sentence-transformers"*
+3. *"Manual testing — for formal evaluation, I'd use RAGAS"*
+4. *"Designed for a local laptop scale — would scale differently for production"*
+5. *"Used pretrained all-MiniLM-L6-v2 for embeddings"*
+
+---
+
+## 🐛 PART 9 — Honest Challenges to Share
+
+### Challenge 1: Chunk size tuning
+- **Problem:** Initial chunk size (500) was too small — retrieved chunks lacked context
+- **Solution:** Increased to 1000 with 200 overlap. Tested by manually reviewing retrieved chunks for sample questions
+
+### Challenge 2: PDF parsing artifacts
+- **Problem:** PyPDF extracted some text with weird spacing, broken sentences across pages
+- **Solution:** For this scope, accepted the noise. Production would use pdfplumber or Unstructured for cleaner extraction
+
+### Challenge 3: Ollama performance on CPU
+- **Problem:** Inference is slow on laptop CPU (especially first response)
+- **Solution:** Pre-warmed model on app startup, used smaller model (3B), accepted the latency for offline use
+
+### Challenge 4: Prompt iteration
+- **Problem:** Early prompts let the model hallucinate or add extra commentary
+- **Solution:** Iteratively refined the prompt to be more explicit about constraints — "use ONLY the context", "say I don't know"
+
+### Challenge 5: Citations
+- **Problem:** Tracking which chunk contributed to the answer
+- **Solution:** Returned the retrieved chunks' metadata (source file, page number) as `sources` field in the response
+
+---
+
+## ✅ PART 10 — Self-Check Before Interview
+
+- [ ] Can deliver 2-minute walkthrough from memory
+- [ ] Can draw the architecture
+- [ ] Can explain RAG end-to-end
+- [ ] Can explain why each tech was chosen (FAISS, Ollama, LangChain, FastAPI)
+- [ ] Can explain chunking strategy with numbers (1000/200)
+- [ ] Can explain embedding model + dimension (all-MiniLM-L6-v2, 384)
+- [ ] Can explain prompt template structure
+- [ ] Can defend top-k = 4
+- [ ] Can explain hallucination mitigation
+- [ ] Can compare RAG vs fine-tuning
+- [ ] Have 5 scaling ideas ready
+- [ ] Have 3 honest challenges ready
+- [ ] **HAVE ACTUALLY BUILT THE PROJECT** before claiming any of this
+
+---
+
+## 🎯 The Single Most Important Sentence
+
+> *"AcquirerX Compliance Assistant is a personal project I built — a fully local RAG-powered Q&A system over PCI-DSS and RBI compliance documents. It uses FastAPI, LangChain, FAISS for vector storage, all-MiniLM-L6-v2 for embeddings, and Ollama running llama3.2:3b locally as the LLM. Designed as an AI extension to my AcquirerX payments platform to demonstrate hands-on RAG engineering."*
+
+---
+
+## 🛠️ PART 11 — Build Checklist
+
+Before this goes on your resume:
+
+- [ ] Hand the SPEC document to Claude Code
+- [ ] Get the project built end-to-end
+- [ ] Pull repo to your laptop
+- [ ] Install Python + dependencies
+- [ ] Install Ollama, pull llama3.2:3b
+- [ ] Run ingestion script — verify FAISS index is created
+- [ ] Run FastAPI server
+- [ ] Test `POST /ask` with sample questions
+- [ ] Verify answers reference correct documents
+- [ ] Push to GitHub with clean README
+- [ ] Take screenshots of working Q&A
+- [ ] **THEN** add to resume with confidence
+
+---
+
+*End of AcquirerX Compliance Assistant Deep Dive. Next: ITC Log Monitoring.*

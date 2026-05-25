@@ -1,0 +1,467 @@
+---
+title: ITC Log Monitoring Project Deep Dive
+tags: [interview, cognizant, ace-team, project-prep, observability, grafana, prometheus, loki, sql-server]
+created: 2026-05-25
+owner: Kailash
+status: in-progress
+priority: medium
+---
+
+# 📊 ITC Log Monitoring — Complete Project Deep Dive
+
+> **Smaller project but still on resume.** Demonstrates observability skills, real-world enterprise work, and operational thinking. Most interview questions will be short.
+
+---
+
+## 📋 Quick Reference
+
+| Field | Value |
+|---|---|
+| **Full name** | Real-time Log Monitoring Solution at ITC Limited |
+| **Type** | Software Development Internship |
+| **Duration** | June 2025 – July 2025 (1 month) |
+| **Scale** | 5+ production servers |
+| **Tech** | SQL Server, Grafana, Prometheus, Loki |
+| **Focus** | Observability, real-time dashboards, alerting |
+
+---
+
+## 🎯 PART 1 — What This Project Did
+
+### The Problem It Solved
+
+Before the project:
+- ITC's operations team manually inspected logs across **multiple production servers**
+- Plant engineers had to SSH into individual servers to debug issues
+- No centralized view of system health
+- Critical errors might go unnoticed until they cascaded
+- Slow response time to incidents
+- Different teams needed different views but had access to everything
+
+### The Solution
+
+A **centralized log monitoring solution** that:
+1. Aggregates logs from 5+ production servers in real-time
+2. Provides role-based dashboards (engineers see X, managers see Y)
+3. Allows plant-specific filtering
+4. Sends alerts for critical system events
+5. Reduces manual log inspection time significantly
+
+### Business Value
+
+- Faster incident detection
+- Reduced operational burden on the ops team
+- Tailored visibility per role
+- Compliance — audit logs centralized
+- Proactive issue detection via alerts
+
+---
+
+## 🏗️ PART 2 — Architecture
+
+### High-Level Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│           5+ PRODUCTION SERVERS                 │
+│  ┌────────┐  ┌────────┐  ┌────────┐            │
+│  │Server 1│  │Server 2│  │Server N│  ...        │
+│  │Logs    │  │Logs    │  │Logs    │            │
+│  └───┬────┘  └───┬────┘  └───┬────┘            │
+└──────┼───────────┼───────────┼─────────────────┘
+       │           │           │
+       └───────────┼───────────┘
+                   │ Log shippers (Promtail / agents)
+                   ▼
+┌─────────────────────────────────────────────────┐
+│                   LOKI                          │
+│         (Log aggregation + storage)             │
+└──────────────────┬──────────────────────────────┘
+                   │
+       ┌───────────┼────────────────┐
+       │           │                │
+       ▼           ▼                ▼
+┌──────────┐ ┌──────────┐    ┌──────────────┐
+│SQL Server│ │Prometheus│    │   Grafana    │
+│(metrics  │ │(metrics  │    │ (dashboards) │
+│ storage) │ │ scraping)│    │              │
+└──────────┘ └────┬─────┘    └──────────────┘
+                  │                  ▲
+                  └──────────────────┘
+                  (Prometheus is a Grafana data source)
+
+
+Grafana Dashboards:
+├── Role: Plant Engineer
+│   ├── Plant-specific filters
+│   ├── Error rate
+│   ├── Critical events
+│   └── Server health
+└── Role: Manager
+    ├── KPIs across plants
+    ├── Trend analysis
+    └── Summary stats
+```
+
+### Components
+
+| Component | Role |
+|---|---|
+| **Log Shippers** | Agents on each server that push logs to Loki |
+| **Loki** | Stores and indexes logs |
+| **Prometheus** | Scrapes metrics from servers |
+| **SQL Server** | Stores structured event/log data |
+| **Grafana** | Visualizes logs + metrics, alerts |
+
+---
+
+## 🧠 PART 3 — Tech Stack Deep Dive
+
+### 3.1 SQL Server
+
+> [!info] What it is
+> Microsoft SQL Server — an enterprise relational database. Used in many traditional enterprises (ITC included) for transactional data.
+
+**Why used in this project:**
+- ITC's existing infrastructure used SQL Server
+- Structured event data (timestamps, severity, plant ID, machine ID) fits well in SQL
+- Strong query capabilities for filtering and aggregation
+- Integration with Grafana via SQL plugin
+
+**Key SQL operations used:**
+- INSERT — logging events
+- SELECT with filters, GROUP BY for dashboards
+- Indexed columns for fast lookups (timestamp, plant_id, severity)
+- Views for role-based access control
+
+**Interview prep:**
+- *"Why SQL Server over PostgreSQL?"* → ITC's existing infrastructure used SQL Server; chose to integrate rather than introduce another DB
+- *"Why a SQL database for logs?"* → Structured event data fits SQL well. Time-series databases would be better for high-volume metrics, but the volume here was manageable
+
+---
+
+### 3.2 Grafana
+
+> [!info] What it is
+> Grafana is an open-source dashboard and visualization platform. Connects to many data sources (Prometheus, Loki, SQL databases, etc.) and renders interactive dashboards.
+
+**Why Grafana:**
+- Industry standard for observability dashboards
+- Supports many data sources
+- Powerful query and visualization options
+- Role-based access control
+- Alerting built-in
+- Plugin ecosystem
+
+**What you built in Grafana:**
+
+**Role-based dashboards:**
+- Plant Engineer view: server health, error logs, critical events, plant-specific
+- Manager view: KPI summaries, trends, multi-plant comparison
+
+**Plant-specific filters:**
+- Variable in dashboard (`$plant`) that users select
+- All queries filter on the selected plant
+- Single dashboard, multiple plant views
+
+**Alert mechanisms:**
+- Alerts on error rate spikes
+- Alerts on critical event keywords
+- Notification channels (email, Slack)
+
+**Interview prep:**
+- *"Why Grafana?"* → Industry standard, supports many data sources, role-based access, alerting built-in
+- *"How did you implement role-based dashboards?"* → Multiple dashboards, each with permission scoping. Plant engineers see operational details; managers see KPIs and trends
+- *"How did you do plant-specific filtering?"* → Dashboard variables — a `$plant` dropdown that drives all panel queries
+
+---
+
+### 3.3 Prometheus
+
+> [!info] What it is
+> Prometheus is an open-source monitoring system and time-series database. Pull-based — Prometheus scrapes metrics from configured endpoints at regular intervals.
+
+**Why Prometheus:**
+- De facto standard for metrics in cloud-native environments
+- Pull model is reliable (servers expose `/metrics`, Prometheus scrapes)
+- PromQL query language is powerful
+- Native Grafana integration
+
+**Metrics typically collected:**
+- CPU usage
+- Memory usage
+- Disk I/O
+- Network traffic
+- Application-specific metrics (request rate, errors, latency)
+
+**Key Prometheus concepts:**
+- **Targets** — endpoints to scrape
+- **Scrape interval** — how often to pull (e.g., every 15 seconds)
+- **Metrics types** — counter, gauge, histogram, summary
+- **PromQL** — query language: `rate(http_requests_total[5m])`
+
+**Interview prep:**
+- *"Pull vs push model?"* → Pull is more reliable in distributed systems. Targets just expose metrics; Prometheus controls timing. Push works better for short-lived jobs
+- *"What is PromQL?"* → Prometheus Query Language. Used to query metrics over time. E.g., `rate(http_requests_total[5m])` gives request rate
+- *"Counters vs gauges?"* → Counter: monotonically increasing (total requests). Gauge: can go up or down (current memory). Histograms and summaries are for distributions
+
+---
+
+### 3.4 Loki
+
+> [!info] What it is
+> Grafana Loki — an open-source log aggregation system inspired by Prometheus. Designed to be cost-effective and scalable. Indexes labels rather than full log content.
+
+**Why Loki (the "L" in the LGTM stack):**
+- Designed by Grafana Labs (same family as Grafana, Prometheus, Tempo, Mimir)
+- More cost-effective than ELK (Elasticsearch) — indexes only labels, not full text
+- Native Grafana integration
+- Uses LogQL (similar to PromQL)
+
+**How Loki works:**
+- Log shippers (Promtail, Fluentd, Vector) push logs from servers to Loki
+- Logs are stored with labels (e.g., `server=prod1`, `service=api`)
+- Loki indexes labels (cheap), not content (expensive)
+- LogQL queries labels, then full-text searches matching log entries
+
+**LogQL examples:**
+- `{server="prod1"}` — all logs from server prod1
+- `{severity="error"}` — all error logs
+- `{server="prod1"} |= "exception"` — prod1 logs containing "exception"
+
+**Interview prep:**
+- *"Why Loki over ELK?"* → Cost — Loki indexes labels only, not full content, much cheaper at scale. ELK indexes everything, faster search but expensive
+- *"How does Loki integrate with Grafana?"* → Native data source. You query LogQL in Grafana, see logs alongside metrics in the same dashboard
+
+---
+
+### 3.5 The LGTM Stack (Optional Knowledge)
+
+Grafana's observability stack:
+- **L**oki — logs
+- **G**rafana — visualization
+- **T**empo — distributed tracing
+- **M**imir — metrics (scaled Prometheus)
+
+You used L + G in your project. Mentioning the full stack shows broader awareness.
+
+---
+
+## 🎓 PART 4 — Key Concepts to Master
+
+### 4.1 Observability — The Three Pillars
+
+1. **Logs** — discrete events (errors, requests, user actions)
+2. **Metrics** — numerical measurements over time (CPU, latency, request rate)
+3. **Traces** — end-to-end request flows through distributed systems
+
+Your project covered logs (Loki) and metrics (Prometheus + SQL Server). Tracing (Tempo, Jaeger) is the third pillar.
+
+### 4.2 Push vs Pull Monitoring
+
+**Push model:**
+- Services send metrics to a collector
+- Better for short-lived jobs (batch, lambdas)
+- Examples: StatsD, OpenTelemetry push
+
+**Pull model:**
+- Collector scrapes metrics from services at intervals
+- Better for long-running services
+- More reliable (no lost data if collector is down)
+- Examples: Prometheus
+
+### 4.3 Time-Series Data
+
+Logs and metrics are time-series — values indexed by time.
+
+**Time-series databases (TSDBs):**
+- Prometheus (metrics)
+- InfluxDB
+- TimescaleDB
+- VictoriaMetrics
+
+Designed for high-write, append-only data with time-based queries.
+
+### 4.4 Alerting Best Practices
+
+**SLO-based alerting:**
+- Define Service Level Objectives (e.g., 99.9% uptime)
+- Alert when burn rate threatens the SLO
+
+**Avoid alert fatigue:**
+- Only alert on actionable issues
+- Group related alerts
+- Severity levels (info, warning, critical)
+- Use silencing during maintenance
+
+**Common alert patterns:**
+- Threshold (CPU > 90%)
+- Rate of change (error rate spike)
+- Anomaly detection (deviation from baseline)
+- Missing data (service stopped reporting)
+
+### 4.5 Role-Based Access Control (RBAC) for Dashboards
+
+In Grafana:
+- Users / teams have roles (Viewer, Editor, Admin)
+- Dashboards can be assigned to teams
+- Folders organize dashboards by role
+- Plant engineers can see plant dashboards; managers see KPI dashboards
+
+### 4.6 Log Aggregation Patterns
+
+**Sidecar pattern:**
+- Log shipper runs alongside the service
+- Reads service logs, ships to central store
+
+**Logging agent:**
+- Single agent per server (Filebeat, Promtail, Fluentd)
+- Tails log files, ships to central store
+
+**Library integration:**
+- Service logs directly to central store via library
+- Less common, more coupling
+
+### 4.7 Common Logging Levels
+
+- **DEBUG** — verbose, for development
+- **INFO** — normal events
+- **WARN** — something unusual, not an error
+- **ERROR** — failure, needs attention
+- **FATAL** — system crashing
+
+---
+
+## 🎤 PART 5 — Common Interview Questions
+
+### Q1: Walk me through the ITC log monitoring project
+
+> At ITC Limited during my software development internship, I built a real-time log monitoring solution to replace manual log inspection across 5+ production servers. The system aggregates logs centrally, provides role-based dashboards, and alerts on critical events.
+>
+> Architecture-wise, logs flow from production servers to Loki for centralized storage. Prometheus scrapes server metrics in parallel. Structured events go into SQL Server. Grafana sits on top of all three as the visualization and alerting layer.
+>
+> I built role-based dashboards — plant engineers see server health and operational details for their assigned plants, while managers see KPIs and cross-plant summaries. Used Grafana dashboard variables to enable plant-specific filtering without duplicating dashboards. Set up alerts for critical system events. The end result reduced manual log inspection effort significantly for the ops team.
+
+### Q2: What's the LGTM stack?
+
+> Grafana's observability stack — Loki for logs, Grafana for visualization, Tempo for distributed tracing, and Mimir for scalable metrics storage. I used Loki and Grafana in this project. Prometheus served the metrics role (Mimir is essentially scaled Prometheus). It's the open-source alternative to commercial observability platforms like Datadog or New Relic.
+
+### Q3: Why Prometheus for metrics?
+
+> Three reasons. First, it's the industry standard for cloud-native monitoring — strong community, lots of integrations. Second, the pull model is more reliable for long-running services — Prometheus scrapes at consistent intervals; no risk of services pushing data and losing it. Third, PromQL is a powerful query language for time-series data — much better than SQL for things like rates and aggregations over time windows.
+
+### Q4: Why Loki over Elasticsearch?
+
+> Loki indexes only labels, not full log content. This makes it dramatically cheaper to operate at scale — log content is stored compressed in object storage, and search uses label-based filtering first. Elasticsearch indexes everything, which gives faster full-text search but at much higher infrastructure cost. For our use case — operational logs with structured labels like server name and severity — Loki's approach was a better fit.
+
+### Q5: What is observability?
+
+> Observability is the ability to understand the internal state of a system from its outputs. It has three pillars — logs (discrete events), metrics (numerical measurements over time), and traces (request flows through distributed systems). Monitoring tells you something is wrong; observability lets you figure out why.
+
+### Q6: How did you implement role-based dashboards?
+
+> Two layers. First, at the Grafana team/user level — users were assigned to teams (Plant Engineers, Plant Managers, Admins) with different permissions. Second, at the dashboard level — separate dashboards for each role with appropriate panels and access control. Plant engineers saw operational details (raw logs, server CPU/memory, error counts). Managers saw aggregated KPIs and trends without exposing raw operational data they didn't need.
+
+### Q7: How did plant-specific filtering work?
+
+> Used Grafana dashboard variables. Each dashboard had a `$plant` variable that populated a dropdown of available plants. All panel queries referenced this variable — for example, the error rate panel queried `errors{plant=$plant}`. One dashboard, dynamic plant selection. Cleaner than maintaining a dashboard per plant.
+
+### Q8: How did the alerting work?
+
+> Grafana's built-in alerting. Set up alert rules on specific queries — for example, "alert if error rate over the last 5 minutes exceeds 50 per minute" or "alert if a critical keyword appears in logs". Alerts were grouped to avoid noise and routed to appropriate teams via email and Slack. Severity levels (info, warning, critical) determined who got notified and how urgently.
+
+### Q9: What's the difference between logs, metrics, and traces?
+
+> Different data types for different purposes. Logs are discrete events — what happened, when, where. Used for debugging specific incidents. Metrics are numerical measurements over time — CPU, memory, request rate. Used for monitoring trends and triggering alerts. Traces are end-to-end request flows through distributed systems — used to understand performance and failures across services. Modern observability needs all three.
+
+### Q10: What's a time-series database?
+
+> A database optimized for time-series data — values indexed by timestamp. They handle high write rates, are append-only, and have efficient time-based queries. Prometheus is one example. The data model is typically tuples of (timestamp, metric name, labels, value). Operations like "rate over last 5 minutes" are first-class.
+
+### Q11: What were the challenges?
+
+> A few. First, log volume — some servers produced a lot of logs, indexing everything would have been expensive. Loki's label-based indexing helped manage this. Second, defining useful alerts without alert fatigue — needed to iterate on thresholds based on actual operational patterns. Third, getting plant-specific filtering right without duplicating dashboards — solved with Grafana variables. Fourth, ensuring secure role separation — making sure operational details weren't accidentally exposed in manager dashboards.
+
+### Q12: How would you improve this further?
+
+> A few directions. Add distributed tracing (Tempo or Jaeger) so we can see request flows across services. Add anomaly detection on top of static thresholds — current alerts are rule-based, but ML-based anomaly detection would catch unusual patterns proactively. Standardize log formats across servers (structured JSON logs) for easier parsing and filtering. Add SLO-based alerting — define service level objectives and alert when burn rate threatens them. Migrate from SQL Server to a proper time-series DB (Mimir or InfluxDB) if metrics volume grows. Add on-call rotation integration with PagerDuty.
+
+---
+
+## ⚖️ PART 6 — Tradeoffs
+
+### 6.1 Grafana vs Datadog vs New Relic
+
+| Choice | This Project | Why |
+|---|---|---|
+| Grafana | ✅ Used | Open-source, no per-host pricing |
+| Datadog | ❌ | Excellent but expensive at scale |
+| New Relic | ❌ | Similar tradeoff |
+
+### 6.2 Loki vs ELK (Elasticsearch)
+
+| Choice | This Project | Why |
+|---|---|---|
+| Loki | ✅ Used | Cheaper, simpler, Grafana-native |
+| ELK | ❌ | More powerful search but expensive |
+
+### 6.3 Prometheus vs InfluxDB
+
+| Choice | This Project | Why |
+|---|---|---|
+| Prometheus | ✅ Used | Standard in cloud-native, pull model |
+| InfluxDB | ❌ | Push model, different tradeoffs |
+
+---
+
+## 🚨 PART 7 — Red Flags
+
+### ❌ Don't Say:
+1. *"I architected the entire observability stack from scratch"* → Likely some existing tooling
+2. *"I set up Prometheus / Loki / Grafana production HA clusters"* → That's senior infra work
+3. *"I monitored 1000+ servers"* → You said 5+; stick to that
+
+### ✅ Do Say:
+1. *"I implemented log monitoring across 5+ production servers"*
+2. *"I built role-based dashboards and alerts using Grafana"*
+3. *"I integrated SQL Server, Grafana, Prometheus, and Loki"*
+
+---
+
+## 🐛 PART 8 — Honest Challenges
+
+### Challenge 1: Alert tuning
+- **Problem:** Initial alerts produced too many false positives
+- **Solution:** Iterated on thresholds based on observed traffic, added "for 5 minutes" duration requirements
+
+### Challenge 2: Dashboard performance
+- **Problem:** Some queries were slow when querying large time ranges
+- **Solution:** Pre-aggregated common queries, used indexed columns in SQL, set sensible default time ranges
+
+### Challenge 3: Log shipper configuration
+- **Problem:** Initially logs weren't being labeled consistently across servers
+- **Solution:** Standardized the log shipper config across servers, established naming conventions
+
+---
+
+## ✅ PART 9 — Self-Check Before Interview
+
+- [ ] Can deliver 1-2 minute project pitch
+- [ ] Can name the three pillars of observability
+- [ ] Can explain the LGTM stack
+- [ ] Can explain pull vs push monitoring
+- [ ] Can explain why Loki is cost-effective
+- [ ] Can explain Grafana dashboard variables
+- [ ] Can discuss alerting best practices
+- [ ] Have 2-3 challenges ready
+- [ ] Have 2-3 improvements ready
+
+---
+
+## 🎯 The Single Most Important Sentence
+
+> *"At ITC Limited, I built a real-time log monitoring solution integrating SQL Server, Grafana, Prometheus, and Loki across 5+ production servers — with role-based dashboards for engineers and managers, plant-specific filtering via Grafana variables, and alerts for critical events. Significantly reduced manual log inspection time for the ops team."*
+
+---
+
+*End of ITC Deep Dive. All 4 projects covered.*

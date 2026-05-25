@@ -1,0 +1,858 @@
+---
+title: AcquirerX Project Deep Dive
+tags: [interview, cognizant, ace-team, project-prep, acquirerx, spring-boot, microservices, java]
+created: 2026-05-25
+owner: Kailash
+status: in-progress
+priority: highest-strength
+---
+
+# 💳 AcquirerX — Complete Project Deep Dive
+
+> **Your strongest project.** Built during Cognizant internship. Real production-grade engineering. Biggest probe target — interviewers will dig deep on Spring Cloud, JWT, JPA, microservices patterns.
+
+---
+
+## 📋 Quick Reference
+
+| Field | Value |
+|---|---|
+| **Full name** | AcquirerX — Merchant Acquiring & POS Switch Platform |
+| **Type** | Real-world internship project at Cognizant Technology Solutions |
+| **Duration** | Feb 2026 – May 2026 |
+| **Scale** | 12 microservices, 27 JPA entities |
+| **Lifecycle covered** | Merchant onboarding → terminal provisioning → transaction switching → settlement → reconciliation → disputes |
+| **Tech** | Java 17/21, Spring Boot 3.x, Spring Cloud, React, MySQL/PostgreSQL |
+
+---
+
+## 🎯 PART 1 — What AcquirerX Does (The Domain)
+
+### Domain Context — Payments Industry
+
+Before tech, understand the **payments domain**. This is what makes AcquirerX impressive — it's a real fintech system.
+
+**Key players in card payments:**
+- **Cardholder** — you (the customer)
+- **Merchant** — the shop accepting card payments
+- **Issuer Bank** — the bank that issued your card (e.g., HDFC)
+- **Acquirer Bank** — the bank that processes payments for the merchant (e.g., ICICI, this is what AcquirerX serves)
+- **Card Network** — Visa, Mastercard, RuPay
+- **Payment Switch** — routes transactions between merchants and issuers
+
+### Payment Flow (Memorize This)
+
+```
+Customer swipes card at POS terminal
+        ↓
+POS terminal → Acquirer (AcquirerX!)
+        ↓
+AcquirerX → Card Network (Visa/Mastercard)
+        ↓
+Card Network → Issuer Bank
+        ↓
+Issuer Bank: Approve / Decline
+        ↓
+Response flows back through same path
+        ↓
+Settlement happens (usually T+1 or T+2)
+        ↓
+Reconciliation between acquirer and merchant
+        ↓
+Disputes if any (chargebacks)
+```
+
+### What AcquirerX Implements
+
+| Stage | What AcquirerX Does |
+|---|---|
+| **Merchant Onboarding** | Sign up merchants, KYC checks, account setup |
+| **Terminal Provisioning** | Issue and activate POS terminals |
+| **Transaction Switching** | Route transactions between merchants and issuers |
+| **Settlement** | Move money from card networks to merchant accounts |
+| **Reconciliation** | Match transaction records across systems |
+| **Dispute Workflows** | Handle chargebacks and merchant disputes |
+
+---
+
+## 🏗️ PART 2 — Architecture (Memorize This)
+
+### High-Level Architecture
+
+```
+┌──────────────────────────────────────────────────┐
+│                  CLIENT LAYER                    │
+│              React.js Web Frontend               │
+└────────────────────┬─────────────────────────────┘
+                     │ HTTPS / JWT
+                     ▼
+┌──────────────────────────────────────────────────┐
+│             SPRING CLOUD GATEWAY                 │
+│   (Routes requests, applies filters, auth)       │
+└────┬─────────────┬─────────────┬─────────────────┘
+     │             │             │
+     ▼             ▼             ▼
+┌─────────┐  ┌─────────┐  ┌─────────┐  ... (12 microservices total)
+│Merchant │  │Terminal │  │ Switch  │
+│ Service │  │ Service │  │ Service │
+└────┬────┘  └────┬────┘  └────┬────┘
+     │            │            │
+     └────────────┼────────────┘
+                  │
+                  ▼
+            ┌──────────────┐
+            │   Eureka     │  (Service Discovery)
+            │   Registry   │
+            └──────────────┘
+                  ▲
+                  │
+        ┌─────────┴────────┐
+        │   OpenFeign      │ (Inter-service REST clients)
+        │   Resilience4J   │ (Circuit breakers, retries)
+        └──────────────────┘
+                  │
+                  ▼
+          ┌────────────────┐
+          │   PostgreSQL   │
+          │   / MySQL      │
+          │   (27 JPA      │
+          │    entities)   │
+          └────────────────┘
+```
+
+### Components Breakdown
+
+| Component | Role |
+|---|---|
+| **React Frontend** | Admin/merchant UI |
+| **Spring Cloud Gateway** | Single entry point, routes to microservices |
+| **Eureka Server** | Service discovery — services register and find each other |
+| **OpenFeign** | Declarative REST client for inter-service calls |
+| **Resilience4J** | Circuit breakers, retries, rate limiting |
+| **12 Microservices** | Domain-specific services |
+| **JPA + Hibernate** | Database mapping for 27 entities |
+| **JWT + Spring Security** | Authentication and RBAC |
+| **Swagger / OpenAPI** | API documentation |
+| **Spring Actuator** | Health checks, metrics |
+| **MDC Logging** | Distributed tracing across services |
+
+### The 12 Microservices (Possible Examples)
+
+> [!note] These are typical microservices for a merchant acquiring platform. Adjust to match what you actually built.
+
+1. **Merchant Service** — onboarding, KYC, merchant profiles
+2. **Terminal Service** — POS terminal provisioning, activation
+3. **Switch Service** — transaction routing logic
+4. **Authorization Service** — authorize transactions
+5. **Settlement Service** — daily settlement processing
+6. **Reconciliation Service** — match records across systems
+7. **Dispute Service** — chargeback workflows
+8. **Reporting Service** — analytics, dashboards
+9. **Notification Service** — SMS/email to merchants
+10. **Audit Service** — compliance audit logs
+11. **User/Auth Service** — JWT auth, user management
+12. **Config Service** — centralized configuration
+
+---
+
+## 🧠 PART 3 — Tech Stack Deep Dive
+
+### 3.1 Java 17/21
+
+> [!info] What it is
+> Java is a statically typed, object-oriented, JVM-based language. Java 17 (LTS) and 21 (LTS) are current production versions with modern features.
+
+**Why Java for AcquirerX:**
+- Enterprise-grade, used in 95%+ of banking systems
+- Strong type safety — catches bugs at compile time
+- Mature ecosystem (Spring, Hibernate, JPA)
+- Excellent performance (JIT compilation)
+- Memory safety + garbage collection
+- Strong tooling (IntelliJ, Maven, Gradle)
+
+**Modern Java features relevant to AcquirerX:**
+- **Records** (Java 16+) — concise data classes for DTOs
+- **Sealed classes** (Java 17+) — controlled inheritance
+- **Pattern matching** — cleaner instanceof checks
+- **var keyword** — local variable type inference
+- **Text blocks** — multi-line strings
+
+---
+
+### 3.2 Spring Boot 3.x
+
+> [!info] What it is
+> Spring Boot is an opinionated framework built on Spring Framework. It provides auto-configuration, embedded servers, production-ready features (metrics, health checks).
+
+**Why Spring Boot for AcquirerX:**
+- Industry standard for Java enterprise applications
+- Auto-configuration reduces boilerplate
+- Embedded Tomcat (no separate web server needed)
+- Strong starter dependencies (each handles a specific concern)
+- Easy integration with Spring Cloud (microservices)
+
+**Key Spring Boot annotations you'd have used:**
+- `@SpringBootApplication` — main class annotation, enables auto-config
+- `@RestController` — REST controller endpoint
+- `@Service` — business logic layer
+- `@Repository` — data access layer
+- `@Autowired` — dependency injection
+- `@Value` — property injection
+- `@Transactional` — transaction management
+- `@Cacheable` — method-level caching
+
+**Spring Boot 3 specifics (vs Spring Boot 2):**
+- Requires Java 17+
+- Uses Jakarta EE namespaces (not javax)
+- Native image support (GraalVM)
+- Updated dependencies
+
+**Interview prep:**
+- *"What does @SpringBootApplication do?"* → Combines @Configuration, @EnableAutoConfiguration, and @ComponentScan
+- *"How does dependency injection work?"* → Spring creates beans (managed objects), injects them where requested via @Autowired or constructor injection
+- *"What is auto-configuration?"* → Spring scans the classpath, detects libraries, and auto-configures beans for them (e.g., detects H2 on classpath → auto-configures DataSource)
+
+---
+
+### 3.3 Spring Cloud
+
+> [!info] What it is
+> Spring Cloud is a set of tools built on Spring Boot for building microservices systems. Provides service discovery, config management, load balancing, circuit breakers, gateways.
+
+#### 3.3.1 Spring Cloud Gateway
+
+> [!info] What it is
+> An API Gateway built on Spring WebFlux. Single entry point for all client requests, routes to appropriate microservices, applies cross-cutting concerns (auth, rate limiting, logging).
+
+**Why used in AcquirerX:**
+- Hides microservice complexity from clients
+- Centralized authentication (JWT validation)
+- Request routing based on path or headers
+- Load balancing across service instances
+- Rate limiting per client/endpoint
+
+**Key Gateway concepts:**
+- **Routes** — define which incoming request goes to which service
+- **Predicates** — conditions for routes (path, header, method)
+- **Filters** — pre/post processing (auth, logging, request modification)
+
+**Interview prep:**
+- *"Why an API Gateway?"* → Centralizes cross-cutting concerns, hides internal architecture, simplifies client code, enables A/B testing and canary releases
+- *"What's the difference between Gateway and Load Balancer?"* → Load balancer just distributes traffic; Gateway adds intelligence (auth, routing logic, transformations)
+
+#### 3.3.2 Eureka (Service Discovery)
+
+> [!info] What it is
+> A service registry. Microservices register themselves with Eureka on startup. Other services query Eureka to find healthy instances.
+
+**Why service discovery matters:**
+- Microservice IPs/ports change dynamically (containers, autoscaling)
+- Hardcoding addresses doesn't work
+- Eureka provides a "phone book" — services register, others look up
+
+**How it works:**
+1. Service starts → registers with Eureka server (name, host, port, health URL)
+2. Eureka stores this registry
+3. Sends heartbeats every 30 seconds to stay registered
+4. Other services query Eureka by service name → get instance list
+5. Client-side load balancing picks an instance
+
+**Interview prep:**
+- *"What if Eureka itself goes down?"* → Each service caches the registry locally, can continue routing for a while. Eureka clusters are deployed for HA
+- *"Eureka vs Consul vs Zookeeper?"* → All are service discovery tools. Eureka is Netflix's, designed for AWS. Consul (HashiCorp) adds KV store + health checks. Zookeeper is older, stronger consistency
+
+#### 3.3.3 OpenFeign
+
+> [!info] What it is
+> A declarative REST client. You define an interface with annotations; Feign auto-generates the implementation. Makes calling other microservices feel like calling local methods.
+
+**Why used in AcquirerX:**
+- Cleaner than RestTemplate (less boilerplate)
+- Integrates with Eureka for service discovery
+- Supports load balancing (with Ribbon/Spring Cloud LoadBalancer)
+- Can chain with Resilience4J for circuit breaking
+
+**Example pattern:**
+```java
+@FeignClient(name = "merchant-service")
+public interface MerchantClient {
+    @GetMapping("/merchants/{id}")
+    Merchant getMerchant(@PathVariable Long id);
+}
+```
+
+Spring auto-implements this interface, looks up `merchant-service` in Eureka, and calls it.
+
+**Interview prep:**
+- *"Feign vs RestTemplate vs WebClient?"* → Feign is declarative (interface-based); RestTemplate is imperative (sync); WebClient is reactive (async)
+- *"How does Feign integrate with Eureka?"* → Service name (not URL) is used; Feign resolves it via Eureka at runtime
+
+#### 3.3.4 Resilience4J
+
+> [!info] What it is
+> A lightweight fault tolerance library inspired by Netflix Hystrix. Provides circuit breakers, retries, rate limiters, bulkheads, time limiters.
+
+**Why used in AcquirerX:**
+- Microservices fail — handle it gracefully
+- Prevent cascading failures
+- Implement graceful degradation
+- Critical for payment systems (one slow service shouldn't kill the whole chain)
+
+**Key patterns:**
+
+**Circuit Breaker:**
+- States: CLOSED (normal) → OPEN (failing) → HALF_OPEN (testing recovery)
+- After N failures, circuit opens — fail fast without trying
+- After timeout, half-opens — let one request through
+- If it succeeds, closes again
+
+**Retry:**
+- Auto-retry failed calls with backoff
+- Use for transient failures (network blips)
+
+**Bulkhead:**
+- Limit concurrent calls to a service
+- Prevents one slow dependency from exhausting threads
+
+**Rate Limiter:**
+- Cap requests per time window
+- Protects against abuse
+
+**Interview prep:**
+- *"Walk me through circuit breaker states"* → CLOSED accepts traffic; on threshold failures it goes OPEN (rejects immediately); after wait time, HALF_OPEN tests one request — success → CLOSED, failure → OPEN
+- *"Why not use Hystrix?"* → Hystrix is in maintenance mode. Resilience4J is the modern replacement — lightweight, functional, no servlet dependency
+
+---
+
+### 3.4 JPA + Hibernate
+
+> [!info] What JPA is
+> Java Persistence API — a specification for ORM (Object-Relational Mapping) in Java. Lets you map Java objects to database tables.
+
+> [!info] What Hibernate is
+> The most popular JPA implementation. Translates JPA annotations into SQL.
+
+**Why JPA in AcquirerX:**
+- Maps 27 Java entities to database tables automatically
+- No manual SQL for basic CRUD
+- Supports complex relationships (one-to-many, many-to-many)
+- Caching (first-level and second-level)
+- Lazy loading for performance
+
+**Key JPA annotations:**
+- `@Entity` — marks a class as a database entity
+- `@Table` — specifies table name
+- `@Id` — primary key
+- `@GeneratedValue` — auto-generated ID
+- `@Column` — column properties
+- `@OneToMany`, `@ManyToOne` — relationships
+- `@JoinColumn` — foreign key column
+
+**Spring Data JPA:**
+- Builds on top of JPA
+- Provides `JpaRepository` interface with CRUD methods out of the box
+- Auto-generates queries from method names: `findByEmailAndStatus(...)`
+
+**Interview prep:**
+- *"What is the N+1 problem?"* → When you fetch N entities and lazy-load a relationship → triggers N additional queries. Solution: JOIN FETCH or @EntityGraph
+- *"Lazy vs Eager loading?"* → Lazy: relationships fetched only when accessed. Eager: fetched immediately. Lazy is the default and usually preferred
+- *"What is @Transactional?"* → Wraps the method in a database transaction. Rolls back on RuntimeException by default
+- *"JPQL vs Native SQL?"* → JPQL is object-oriented (queries entities), database-agnostic. Native SQL is database-specific but more powerful
+
+---
+
+### 3.5 Dynamic JPQL Filtering with Pagination
+
+> [!info] What this is
+> Letting users filter results dynamically (e.g., merchants where status = active, joined after a date, MCC code = X), with results paginated.
+
+**Why this matters in AcquirerX:**
+- Merchant dashboards need filtering (by status, region, MCC code)
+- Transaction reports need date ranges, amount filters
+- Pagination prevents huge result sets
+
+**How implemented:**
+- **JPA Criteria API** — type-safe dynamic queries
+- **Specifications** (Spring Data) — composable filters
+- **Pageable** parameter — `Pageable.of(page, size, sort)`
+- Returns `Page<T>` with content + total count
+
+**Interview prep:**
+- *"How does pagination work in JPA?"* → `Pageable` carries page number, size, sort. Repository returns `Page<T>`. SQL gets LIMIT and OFFSET
+- *"Why dynamic filtering?"* → Users want flexible queries without writing 50 different repository methods. Criteria API or Specifications let you build queries based on which filters are non-null
+
+---
+
+### 3.6 JWT-based RBAC
+
+> [!info] What JWT is
+> JSON Web Token — a compact, signed token containing user claims. Used for stateless authentication.
+
+**Structure of a JWT:** `header.payload.signature`
+- **Header:** algorithm + token type
+- **Payload:** claims (user ID, role, expiry)
+- **Signature:** signed with secret key (HMAC) or private key (RSA)
+
+**Authentication Flow:**
+1. User logs in with credentials
+2. Auth service validates, issues JWT
+3. Client stores JWT (localStorage, cookie)
+4. Every API call includes JWT in `Authorization: Bearer <token>` header
+5. Spring Security validates the JWT signature and expiry
+6. Extracts user info from claims
+7. Checks role-based permissions
+
+**RBAC (Role-Based Access Control):**
+- Roles: Admin, Merchant Operator, Finance, Support
+- Each endpoint has required roles
+- Enforced via `@PreAuthorize("hasRole('ADMIN')")` annotations
+
+**Interview prep:**
+- *"Why JWT instead of session cookies?"* → Stateless — no server-side session storage. Scales horizontally easily. Works across microservices
+- *"What if JWT is stolen?"* → Use short expiry + refresh tokens. Implement token revocation list (Redis). Use HTTPS only
+- *"How is the JWT signature verified?"* → For HMAC: server recomputes signature with secret key and compares. For RSA: server verifies with public key
+
+---
+
+### 3.7 PAN Masking + PCI-DSS
+
+> [!info] What PAN is
+> Primary Account Number — the 16-digit card number on a credit/debit card.
+
+> [!info] What PCI-DSS is
+> Payment Card Industry Data Security Standard — global standard for handling card data. Mandatory for anyone processing card payments.
+
+**PAN Masking:**
+- Never store full PAN in logs, displays, databases unless absolutely needed
+- Standard format: `4111 **** **** 1234` (first 6 + last 4 visible)
+- Implemented at multiple layers: API responses, logs, UI
+
+**PCI-DSS Requirements You'd Have Followed:**
+- Encrypt cardholder data in transit (TLS 1.2+)
+- Encrypt at rest if storing
+- Restrict access on need-to-know basis
+- Log access to cardholder data
+- Tokenization where possible (replace PAN with token)
+- Regular security testing
+
+**Interview prep:**
+- *"Why mask PANs?"* → PCI-DSS compliance. Prevents data leakage via logs, screenshots, support tickets. Reduces blast radius if a system is compromised
+- *"What's the difference between masking and tokenization?"* → Masking is one-way display protection (e.g., `**** **** **** 1234`). Tokenization replaces PAN with a token that can be reversed by an authorized tokenization service
+
+---
+
+### 3.8 MDC Logging (Mapped Diagnostic Context)
+
+> [!info] What MDC is
+> A logging feature that lets you attach context (user ID, request ID, trace ID) to all log statements in a thread. Makes distributed tracing possible.
+
+**Why used in AcquirerX:**
+- Multiple microservices handle a single payment
+- Need to trace a transaction across all services
+- Each request gets a unique `traceId` added to MDC
+- All log statements automatically include the traceId
+
+**How it works:**
+1. Gateway/filter receives request → generates trace ID
+2. Stores it in MDC: `MDC.put("traceId", uuid)`
+3. Logger picks up MDC context automatically
+4. Trace ID is propagated to downstream services (via headers)
+5. Each service logs with the same trace ID
+6. Searching logs by trace ID reconstructs the full request journey
+
+**Interview prep:**
+- *"How does distributed tracing work?"* → Each request gets a trace ID at entry point. Propagated to all services via headers (e.g., X-Trace-Id). All logs include trace ID. Tools like Zipkin/Jaeger visualize the trace
+- *"MDC vs Spring Sleuth vs OpenTelemetry?"* → MDC is a logging library feature. Spring Sleuth adds trace IDs automatically. OpenTelemetry is the modern unified standard
+
+---
+
+### 3.9 Swagger / OpenAPI
+
+> [!info] What it is
+> OpenAPI is a specification for describing REST APIs. Swagger UI is a tool that generates interactive API docs from OpenAPI specs.
+
+**Why used in AcquirerX:**
+- Documents all 12 services' APIs
+- Interactive — developers can test endpoints in browser
+- Self-documenting code
+- Grouped Swagger means each microservice exposes its own docs, aggregated for the team
+
+**Implementation:**
+- Add `springdoc-openapi-ui` dependency
+- Spring scans `@RestController` methods
+- Auto-generates spec at `/v3/api-docs`
+- Swagger UI at `/swagger-ui.html`
+
+**Interview prep:**
+- *"Why Swagger?"* → Single source of truth for API contracts. Frontend devs don't need to wait for backend docs. QA can test directly. Auto-updates with code changes
+- *"Why grouped Swagger?"* → With 12 microservices, you don't want one huge spec. Grouping segments docs by service so each team can find their APIs
+
+---
+
+### 3.10 Spring Actuator
+
+> [!info] What it is
+> Spring Boot Actuator exposes production-ready features as HTTP endpoints — health checks, metrics, info, environment variables.
+
+**Why used in AcquirerX:**
+- Health checks for Kubernetes readiness/liveness probes
+- Metrics for monitoring (Prometheus scrapes Actuator endpoints)
+- Quick diagnostic access for ops team
+- Standard for production Spring Boot apps
+
+**Key Actuator endpoints:**
+- `/actuator/health` — service is up and dependencies are healthy
+- `/actuator/info` — build info, version
+- `/actuator/metrics` — JVM, HTTP, custom metrics
+- `/actuator/prometheus` — Prometheus-formatted metrics
+- `/actuator/env` — environment variables (locked down in prod)
+
+**Interview prep:**
+- *"Why expose Actuator endpoints?"* → Health checks for orchestrators (K8s), metrics for monitoring, info for debugging
+- *"Is this secure?"* → Sensitive endpoints (env, beans) should be restricted. Use Spring Security to lock them down
+
+---
+
+### 3.11 React.js (Frontend)
+
+**Why used:**
+- Industry standard for SPAs
+- Component reusability
+- Strong ecosystem (React Router, Axios, Redux/Zustand)
+- Easy integration with REST APIs
+
+**Likely used in AcquirerX frontend:**
+- Functional components + hooks (`useState`, `useEffect`)
+- React Router for multi-page navigation
+- Axios for HTTP calls to Gateway
+- Forms with controlled components
+- JWT stored in localStorage or memory
+- Conditional rendering based on user role
+
+**Interview prep:**
+- *"How did the frontend talk to 12 microservices?"* → Through Spring Cloud Gateway only. Frontend doesn't know about individual services
+- *"How did you handle JWT in React?"* → Store token after login. Add to every Axios request via interceptor. Handle 401 responses (re-auth or redirect)
+
+---
+
+## 🎓 PART 4 — Key Concepts to Master
+
+### 4.1 Microservices Architecture
+
+**Definition:** Architectural style where an application is built as a collection of small, independently deployable services, each running in its own process and communicating over the network.
+
+**Benefits:**
+- Independent deployment
+- Technology heterogeneity
+- Fault isolation
+- Scalability per service
+
+**Tradeoffs:**
+- Network latency
+- Distributed debugging
+- Operational complexity
+- Data consistency challenges
+
+### 4.2 12-Factor App Principles
+
+A methodology for building cloud-native applications. AcquirerX likely follows several:
+1. **Codebase** — one codebase per service, tracked in Git
+2. **Dependencies** — explicit declarations (Maven)
+3. **Config** — externalized config (application.properties, env vars)
+4. **Backing services** — DB, queue treated as attached resources
+5. **Build, release, run** — strict separation
+6. **Processes** — stateless (state in DB)
+7. **Port binding** — embedded Tomcat
+8. **Concurrency** — scale via process model
+9. **Disposability** — fast startup, graceful shutdown
+10. **Dev/prod parity** — keep environments similar
+11. **Logs** — write to stdout, aggregate externally
+12. **Admin processes** — run as one-off processes
+
+### 4.3 REST API Best Practices
+
+- Use proper HTTP methods (GET, POST, PUT, DELETE, PATCH)
+- Use proper status codes (200, 201, 204, 400, 401, 403, 404, 500)
+- Resource-oriented URLs (`/merchants/{id}/terminals`)
+- Stateless
+- Versioning (`/v1/merchants`)
+- Pagination for collections
+- HATEOAS (optional, often skipped)
+- Idempotency for PUT/DELETE
+
+### 4.4 Transactions in Spring
+
+**Propagation levels:**
+- `REQUIRED` (default) — join existing tx or create new
+- `REQUIRES_NEW` — always create new tx
+- `SUPPORTS` — join if exists, else non-transactional
+- `MANDATORY` — must have a tx, else exception
+- `NEVER` — must not have a tx
+
+**Isolation levels:** (relevant when concurrent transactions)
+- READ_UNCOMMITTED — allows dirty reads
+- READ_COMMITTED — prevents dirty reads
+- REPEATABLE_READ — prevents non-repeatable reads
+- SERIALIZABLE — full isolation, slow
+
+**Rollback rules:**
+- Default: rollback on RuntimeException, commit on checked exception
+- Override with `@Transactional(rollbackFor = Exception.class)`
+
+### 4.5 SOLID Principles
+
+You should know these and how Spring Boot helps:
+- **S** — Single Responsibility (each service does one thing)
+- **O** — Open/Closed (extend, don't modify)
+- **L** — Liskov Substitution (interfaces correctly substitutable)
+- **I** — Interface Segregation (small, focused interfaces)
+- **D** — Dependency Inversion (depend on abstractions, not concretions — DI does this!)
+
+### 4.6 SAGA Pattern (Distributed Transactions)
+
+In microservices, you can't use database transactions across services. Use SAGA instead:
+- **Choreography** — services emit events, others react
+- **Orchestration** — a central coordinator manages the workflow
+
+**Example for AcquirerX settlement:**
+- Settle merchant → emit event → notification service sends email
+- If something fails, compensating transactions roll back previous steps
+
+### 4.7 CAP Theorem
+
+In distributed systems, you can have at most 2 of:
+- **Consistency** — all nodes see the same data
+- **Availability** — every request gets a response
+- **Partition tolerance** — system continues despite network failures
+
+Most modern systems pick AP (NoSQL) or CP (traditional RDBMS like PostgreSQL).
+
+---
+
+## 🎤 PART 5 — Common Interview Questions
+
+### Q1: Walk me through AcquirerX end-to-end (2 minutes)
+
+> AcquirerX is a Merchant Acquiring and POS Switch platform I architected during my Cognizant internship. It handles the full payment lifecycle for merchant transactions — from onboarding merchants, provisioning POS terminals, switching live transactions between acquirers and card networks, settling funds, reconciling records, and managing disputes.
+>
+> The system is built as 12 microservices in Spring Boot 3.x, each owning a domain — merchant, terminal, switch, settlement, reconciliation, dispute, and so on. They communicate through OpenFeign REST clients with Resilience4J circuit breakers for fault tolerance. Eureka handles service discovery, and Spring Cloud Gateway is the single entry point for the React frontend.
+>
+> Data persistence is via Spring Data JPA with Hibernate over 27 entities. The platform implements production-grade patterns — JWT-based RBAC, dynamic JPQL filtering with pagination, PAN masking for PCI compliance, MDC-based distributed logging, and Swagger documentation for all services. Spring Actuator endpoints expose health and metrics for observability.
+
+### Q2: Why microservices over monolith?
+
+> A few reasons. First, domain boundaries map naturally — merchant onboarding, switching, settlement are independent business processes that evolve at different rates. Second, fault isolation — if the dispute service crashes, transactions keep flowing. Third, independent scaling — switching is high-throughput and needs more instances than dispute. Fourth, team scalability — different teams could own different services. The tradeoff is operational complexity — debugging across services, network failures, eventual consistency. But for a system at this scale, the benefits outweigh the costs.
+
+### Q3: Walk me through a Resilience4J circuit breaker
+
+> Three states. CLOSED is the normal state — requests pass through. If failures exceed a threshold (say 50% of last 20 calls), it transitions to OPEN — all requests fail immediately without hitting the downstream service. This prevents cascading failures. After a timeout (say 30 seconds), it goes HALF_OPEN — lets one or a few requests through to test recovery. If they succeed, it closes again. If they fail, it stays open. We used circuit breakers around every inter-service Feign call, especially around the settlement and switching services where downstream failures would otherwise propagate.
+
+### Q4: How does JWT-based RBAC work in your system?
+
+> User logs in via the auth service — credentials are validated, and a JWT is issued containing the user ID, role, and expiry. The JWT is signed with a secret key using HMAC SHA-256. The client stores the token and includes it in every API request via the Authorization header. Spring Cloud Gateway intercepts every request, validates the JWT signature, checks expiry, and propagates the token downstream. Each microservice extracts the role from the JWT and enforces RBAC using Spring Security's @PreAuthorize annotations. For example, only users with the ADMIN role can call merchant onboarding APIs.
+
+### Q5: How does Eureka service discovery work?
+
+> Eureka has two parts — the Eureka server and Eureka clients. On startup, each microservice registers with the Eureka server, providing its service name, host, port, and health check URL. The Eureka server maintains the registry. Other services query the registry by service name to find healthy instances. Heartbeats are sent every 30 seconds to keep the registration alive. If heartbeats stop, the instance is evicted after a timeout. When OpenFeign makes a call to "merchant-service", it asks Eureka for an instance, then makes the actual HTTP call. This decouples services from hardcoded IPs and ports, which is critical when running in containers where addresses change.
+
+### Q6: What is the N+1 problem and how did you solve it?
+
+> The N+1 problem happens when you load N entities, and then for each entity you trigger an additional query to fetch a related entity. So one query becomes N+1 queries. Classic example — loading all merchants and then accessing their terminals collection lazily — that triggers a query per merchant. We solved it with JOIN FETCH in JPQL or @EntityGraph annotations, which fetch the related collection in a single join query. For collections where this isn't practical, we used batch fetching with @BatchSize to fetch related entities in batches of, say, 20 at a time.
+
+### Q7: How did you handle distributed tracing across services?
+
+> We used MDC — Mapped Diagnostic Context — in our logging. When a request enters the gateway, we generate a UUID and put it in the MDC as a "traceId". This trace ID is propagated via HTTP headers to downstream services. Each service extracts it from the header and re-adds it to its MDC. The logging configuration includes the trace ID in every log line. So when debugging an issue, we can search logs across all services for the trace ID and reconstruct the full request flow.
+
+### Q8: Why JWT instead of sessions?
+
+> JWT is stateless. With sessions, you need a centralized session store (Redis, sticky sessions) — which becomes a bottleneck and a failure point in microservices. JWT carries the user's identity and claims inside the token itself, signed for tamper-proofness. Every service can validate independently without a network call. This works perfectly with horizontal scaling and microservices where requests can land on any instance. The tradeoff is you can't easily invalidate a JWT mid-flight — for that, we use short expiry (15-30 min) plus refresh tokens, or a Redis-backed blacklist for high-security cases.
+
+### Q9: What's the biggest challenge you faced?
+
+> Coordinating data consistency across services for settlement workflows. A settlement touches the switch service (which has the original transaction), the settlement service (which moves money), the reconciliation service (which records the match), and the notification service. You can't use a database transaction across services. We implemented a saga pattern where each step emits events, and if a downstream step fails, compensating transactions undo the previous steps. Getting the ordering and error handling right was non-trivial. We also added idempotency keys so retried operations don't duplicate effects.
+
+### Q10: How would you scale AcquirerX further?
+
+> A few areas. First, observability — add Prometheus + Grafana for metrics, Loki for logs, Jaeger for distributed tracing. Second, async messaging — introduce Kafka for high-throughput transaction flows; currently they're sync REST which can bottleneck. Third, caching — add Redis for hot data like merchant profiles. Fourth, database scaling — read replicas for reporting workloads, partitioning transactions by date or merchant. Fifth, deployment — containerize with Docker, orchestrate with Kubernetes, add CI/CD via GitHub Actions. Sixth, security hardening — move secrets to Vault, add mutual TLS between services. Finally, performance testing — load test critical paths like transaction switching to find bottlenecks.
+
+### Q11: Why Spring Boot 3 over Spring Boot 2?
+
+> Spring Boot 3 requires Java 17+, which gives us modern language features like records, sealed classes, and pattern matching. It uses Jakarta EE namespaces instead of javax, which is the long-term direction. It adds native image support via GraalVM, which can dramatically reduce startup time and memory footprint — important for serverless and Kubernetes. It also has updated security defaults and observability improvements.
+
+### Q12: What is dynamic JPQL filtering?
+
+> Letting users filter results by any combination of fields without writing dozens of specific repository methods. For example, on the merchant search endpoint, users might filter by status, region, MCC code, and date range. We used JPA Specifications — composable predicates — to build the query dynamically based on which filters are non-null. Each filter becomes a Specification, and we combine them with .and() or .or(). The result is paginated using a Pageable parameter so we return a Page object with content + total count.
+
+---
+
+## ⚖️ PART 6 — Tradeoffs and Alternatives
+
+### 6.1 Spring Boot vs Quarkus vs Micronaut
+
+| Choice | AcquirerX Pick | Why |
+|---|---|---|
+| Spring Boot | ✅ Used | Mature, huge ecosystem, industry standard |
+| Quarkus | ❌ | Faster startup but smaller community |
+| Micronaut | ❌ | Compile-time DI is interesting but less mature |
+
+### 6.2 Eureka vs Consul vs Kubernetes Service Discovery
+
+| Choice | AcquirerX Pick | Why |
+|---|---|---|
+| Eureka | ✅ Used | Spring Cloud integration, simple |
+| Consul | ❌ | More features but more complex |
+| K8s Service Discovery | ❌ | Would have used if we were on K8s |
+
+### 6.3 OpenFeign vs WebClient vs RestTemplate
+
+| Choice | AcquirerX Pick | Why |
+|---|---|---|
+| OpenFeign | ✅ Used | Declarative, clean, integrates with Eureka |
+| WebClient | ❌ | Reactive overhead unnecessary for our sync flows |
+| RestTemplate | ❌ | Deprecated, more boilerplate |
+
+### 6.4 PostgreSQL vs MySQL
+
+| Choice | AcquirerX Pick | Why |
+|---|---|---|
+| PostgreSQL | ✅ Likely used | Better JSON, stronger transactional guarantees, free |
+| MySQL | ✅ Also possible | Wider adoption, simpler ops |
+
+### 6.5 JWT vs OAuth 2.0 vs Sessions
+
+| Choice | AcquirerX Pick | Why |
+|---|---|---|
+| JWT | ✅ Used | Stateless, scales horizontally, perfect for microservices |
+| OAuth 2.0 | (could layer on top) | For third-party integrations |
+| Sessions | ❌ | Requires central state, doesn't scale as cleanly |
+
+### 6.6 Sync REST vs Async Messaging
+
+| Choice | AcquirerX Pick | Why |
+|---|---|---|
+| Sync REST (Feign) | ✅ Used | Simpler, fits transaction flow |
+| Kafka/RabbitMQ | (would add later) | For high-throughput async flows |
+
+---
+
+## 📈 PART 7 — Scaling Considerations
+
+### Infrastructure
+- Docker containerization for each service
+- Kubernetes orchestration
+- Horizontal Pod Autoscalers based on CPU/memory/custom metrics
+- Multi-region deployment for HA
+
+### Database
+- Master-slave replication (writes to master, reads from slaves)
+- Sharding by merchant ID or geographic region
+- Connection pooling (HikariCP)
+- Read replicas for reporting/analytics
+- Partition transaction tables by date
+
+### Caching
+- Redis for hot merchant data, session-like data
+- Cache merchant profiles, terminal configs
+- Cache aside pattern with TTL
+
+### Messaging
+- Kafka for event streaming (transaction events, settlement events)
+- Topics partitioned by merchant
+- Consumer groups for parallel processing
+
+### Observability
+- Prometheus scrapes Actuator endpoints
+- Grafana dashboards for service-level metrics
+- Loki for log aggregation
+- Jaeger for distributed tracing
+- PagerDuty for alerting
+
+### Security
+- Mutual TLS between services
+- Secrets in HashiCorp Vault
+- WAF in front of Gateway
+- Regular security scans
+- PCI-DSS audit compliance
+
+### CI/CD
+- GitHub Actions for build/test/deploy
+- ArgoCD for GitOps deployment
+- Canary releases for risky changes
+- Automated rollback on health check failures
+
+---
+
+## 🚨 PART 8 — Red Flags (DO NOT Say These)
+
+### ❌ Don't Say:
+1. *"It's currently in production at major banks"* → It's an internship project, even if real-world inspired
+2. *"I designed everything alone"* → Was likely team work, with guidance
+3. *"We never had any production issues"* → Every system has issues
+4. *"I'm an expert in payments"* → You learned the domain on the job
+5. *"We can handle 1 million TPS"* → Unless you have load test data, don't claim
+
+### ✅ Do Say:
+1. *"Built during my Cognizant internship"*
+2. *"I led [specific area] with team collaboration on the broader system"*
+3. *"We faced challenges in [specific area] which we solved by [specific solution]"*
+4. *"My understanding of the payments domain grew significantly during this project"*
+
+---
+
+## 🐛 PART 9 — Honest Challenges to Share
+
+### Challenge 1: Cross-service data consistency for settlement
+- **Problem:** Settlement touches multiple services, can't use DB transactions across them
+- **Solution:** Implemented SAGA pattern with compensating transactions
+
+### Challenge 2: N+1 query performance issues
+- **Problem:** Loading merchants with their terminals was triggering N additional queries
+- **Solution:** JOIN FETCH in critical queries, @BatchSize for lazy collections
+
+### Challenge 3: JWT propagation through Feign clients
+- **Problem:** Downstream services need the user context, JWT wasn't auto-propagated
+- **Solution:** Custom Feign RequestInterceptor that copies JWT from incoming request to outgoing Feign calls
+
+### Challenge 4: Configuring Resilience4J thresholds
+- **Problem:** Choosing failure rates and timeouts that don't trip falsely
+- **Solution:** Started conservative (high thresholds), tuned based on observed traffic patterns
+
+### Challenge 5: Pagination performance on large datasets
+- **Problem:** OFFSET-based pagination is slow on deep pages (OFFSET 100000)
+- **Solution:** For some endpoints, switched to cursor-based (keyset) pagination using the last seen ID
+
+### Challenge 6: Coordinating 12 services in development
+- **Problem:** Running all 12 services locally is heavy
+- **Solution:** Docker Compose setup for local dev, stub services where needed
+
+---
+
+## ✅ PART 10 — Self-Check Before Interview
+
+- [ ] Can deliver 2-minute AcquirerX pitch from memory
+- [ ] Can draw the architecture on a whiteboard
+- [ ] Can name all 12 microservices (or at least 8-10 plausible ones)
+- [ ] Can explain Circuit Breaker states
+- [ ] Can explain JWT flow end-to-end
+- [ ] Can explain Eureka service discovery
+- [ ] Can explain N+1 problem
+- [ ] Can explain MDC distributed tracing
+- [ ] Can explain SAGA pattern
+- [ ] Can explain PCI-DSS at high level
+- [ ] Can defend Spring Boot 3 choice
+- [ ] Can explain dynamic JPQL filtering
+- [ ] Have 3 honest challenges ready
+- [ ] Have 5 scaling improvements ready
+- [ ] Know the payment flow (merchant → acquirer → network → issuer)
+
+---
+
+## 🎯 The Single Most Important Sentence
+
+> *"AcquirerX is a 12-microservice Merchant Acquiring and POS Switch platform I architected at Cognizant. It handles the end-to-end payment lifecycle — onboarding, switching, settlement, reconciliation, disputes — using Spring Boot 3, Spring Cloud (Gateway, Eureka, OpenFeign, Resilience4J), JPA with 27 entities, JWT-based RBAC, PAN masking for PCI compliance, MDC distributed logging, and React frontend. It's a production-grade pattern from real fintech."*
+
+Practice this until it flows in 30 seconds.
+
+---
+
+*End of AcquirerX Deep Dive. Next: AcquirerX Compliance Assistant.*
